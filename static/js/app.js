@@ -1,3 +1,9 @@
+// ==========================================
+// 0. API CONFIGURATION (Yahan apna Render URL daalein)
+// Dhyan dein: URL ke aakhir mein slash (/) MAT lagana
+// ==========================================
+const API_BASE_URL = "https://bigknowledge-backend-1.onrender.com"; 
+
 let DB = {
   knowledge: [],
   problems: [],
@@ -42,7 +48,8 @@ function toggleColorMode() {
 
 async function syncDatabase() {
   try {
-    const response = await fetch("/api/bootstrap");
+    // UPDATED: Added API_BASE_URL
+    const response = await fetch(`${API_BASE_URL}/api/bootstrap`);
     DB = await response.json();
     renderAllPages();
     updateRealTimeCharts(); // Database se real chart update karega
@@ -127,7 +134,8 @@ function renderExecutiveDashboard() {
 }
 
 async function updateStartupProgress(id, newProgress) {
-  await fetch("/api/startups", {
+  // UPDATED: Added API_BASE_URL
+  await fetch(`${API_BASE_URL}/api/startups`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id: id, progress: Number(newProgress) })
@@ -136,7 +144,8 @@ async function updateStartupProgress(id, newProgress) {
 }
 
 async function deleteStartup(id) {
-  await fetch(`/api/startups?id=${id}`, { method: "DELETE" });
+  // UPDATED: Added API_BASE_URL
+  await fetch(`${API_BASE_URL}/api/startups?id=${id}`, { method: "DELETE" });
   syncDatabase();
 }
 
@@ -339,7 +348,8 @@ function renderKnowledgeVault() {
 }
 
 async function deleteKnowledge(id) {
-  await fetch(`/api/knowledge?id=${id}`, { method: "DELETE" });
+  // UPDATED: Added API_BASE_URL
+  await fetch(`${API_BASE_URL}/api/knowledge?id=${id}`, { method: "DELETE" });
   syncDatabase();
 }
 
@@ -502,13 +512,15 @@ function renderTasksAndKanban() {
 }
 
 async function deleteTask(id) {
-  await fetch(`/api/tasks?id=${id}`, { method: "DELETE" });
+  // UPDATED: Added API_BASE_URL
+  await fetch(`${API_BASE_URL}/api/tasks?id=${id}`, { method: "DELETE" });
   syncDatabase();
 }
 
 async function handleKanbanDrop(e, targetStage) {
   const id = Number(e.dataTransfer.getData("text/plain"));
-  await fetch("/api/tasks", {
+  // UPDATED: Added API_BASE_URL
+  await fetch(`${API_BASE_URL}/api/tasks`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id, kanban_stage: targetStage })
@@ -561,7 +573,8 @@ function executeMemorySearch() {
 // Form Handlers
 async function handleAddKnowledge(e) {
   e.preventDefault();
-  await fetch("/api/knowledge", {
+  // UPDATED: Added API_BASE_URL
+  await fetch(`${API_BASE_URL}/api/knowledge`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -579,7 +592,8 @@ async function handleAddKnowledge(e) {
 
 async function handleAddProblem(e) {
   e.preventDefault();
-  await fetch("/api/problems", {
+  // UPDATED: Added API_BASE_URL
+  await fetch(`${API_BASE_URL}/api/problems`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -598,7 +612,8 @@ async function handleAddProblem(e) {
 
 async function handleAddStartupDirect(e) {
   e.preventDefault();
-  await fetch("/api/startups", {
+  // UPDATED: Added API_BASE_URL
+  await fetch(`${API_BASE_URL}/api/startups`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -617,7 +632,8 @@ async function handleAddStartupDirect(e) {
 
 async function handleAddTaskDirect(e) {
   e.preventDefault();
-  await fetch("/api/tasks", {
+  // UPDATED: Added API_BASE_URL
+  await fetch(`${API_BASE_URL}/api/tasks`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -634,7 +650,8 @@ async function handleAddTaskDirect(e) {
 
 async function handleAddJournal(e) {
   e.preventDefault();
-  await fetch("/api/journals", {
+  // UPDATED: Added API_BASE_URL
+  await fetch(`${API_BASE_URL}/api/journals`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
