@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BIGKNOWLEDGE — Founder Operating System & Second Brain</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <!-- External Modular CSS -->
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- LEFT SIDEBAR (ALL SEPARATE PAGES) -->
+  <aside class="sidebar" id="sidebarMenu">
+    <div class="brand-box">
+      <div class="brand-icon"><i class="fa-solid fa-brain"></i></div>
+      <div>
+        <div class="fw-bold">BIGKNOWLEDGE</div>
+        <div style="font-size:0.7rem; color:var(--secondary);">FOUNDER OS • SECOND BRAIN</div>
+      </div>
+    </div>
+
+    <div class="nav-group-label">Command & Neural Search</div>
+    <button class="nav-btn active" onclick="openModulePage('dashboard', this)"><i class="fa-solid fa-gauge-high text-info"></i> Main Dashboard</button>
+    <button class="nav-btn" data-page="memory-engine" onclick="openModulePage('memory-engine', this)"><i class="fa-solid fa-magnifying-glass-chart text-warning"></i> Memory Recovery Engine</button>
+    <button class="nav-btn" onclick="openModulePage('knowledge-graph', this)"><i class="fa-solid fa-project-diagram text-primary"></i> Knowledge Graph</button>
+    <button class="nav-btn" onclick="openModulePage('mind-map', this)"><i class="fa-solid fa-sitemap text-success"></i> Mind Map System</button>
+
+    <div class="nav-group-label">Knowledge & Media Vaults</div>
+    <button class="nav-btn" onclick="openModulePage('knowledge-vault', this)"><i class="fa-solid fa-vault text-info"></i> Knowledge Vault</button>
+    <button class="nav-btn" onclick="openModulePage('video-vault', this)"><i class="fa-brands fa-youtube text-danger"></i> Video Vault</button>
+    <button class="nav-btn" onclick="openModulePage('image-vault', this)"><i class="fa-solid fa-images text-warning"></i> Image Vault</button>
+    <button class="nav-btn" onclick="openModulePage('document-vault', this)"><i class="fa-solid fa-file-pdf text-primary"></i> Document Vault</button>
+    <button class="nav-btn" onclick="openModulePage('reference-system', this)"><i class="fa-solid fa-wand-magic-sparkles text-info"></i> Reference Image System</button>
+
+    <div class="nav-group-label">Startup & Innovation Engine</div>
+    <button class="nav-btn" onclick="openModulePage('problem-center', this)"><i class="fa-solid fa-triangle-exclamation text-warning"></i> Problem Collection Center</button>
+    <button class="nav-btn" onclick="openModulePage('problem-engine', this)"><i class="fa-solid fa-bolt text-success"></i> Problem → Startup Engine</button>
+    <button class="nav-btn" onclick="openModulePage('solution-db', this)"><i class="fa-solid fa-lightbulb text-info"></i> Solution Database</button>
+    <button class="nav-btn" onclick="openModulePage('innovation-hub', this)"><i class="fa-solid fa-atom text-primary"></i> Innovation Hub</button>
+    <button class="nav-btn" onclick="openModulePage('startup-db', this)"><i class="fa-solid fa-rocket text-danger"></i> Startup Ideas Database</button>
+    <button class="nav-btn" onclick="openModulePage('active-startup', this)"><i class="fa-solid fa-fire text-warning"></i> Active Startup Workspace</button>
+    <button class="nav-btn" onclick="openModulePage('bmc-canvas', this)"><i class="fa-solid fa-table-cells-large text-success"></i> Business Model Canvas</button>
+
+    <div class="nav-group-label">Execution & Roadmaps</div>
+    <button class="nav-btn" onclick="openModulePage('project-mgmt', this)"><i class="fa-solid fa-list-check text-info"></i> Project Management</button>
+    <button class="nav-btn" onclick="openModulePage('kanban-board', this)"><i class="fa-solid fa-table-columns text-primary"></i> Kanban Board</button>
+    <button class="nav-btn" onclick="openModulePage('roadmap-builder', this)"><i class="fa-solid fa-route text-warning"></i> Roadmap Builder</button>
+
+    <div class="nav-group-label">Founder OS & Team</div>
+    <button class="nav-btn" onclick="openModulePage('journals', this)"><i class="fa-solid fa-book-journal-whills text-info"></i> Founder & Decision Journal</button>
+    <button class="nav-btn" onclick="openModulePage('goals-habits', this)"><i class="fa-solid fa-bullseye text-success"></i> Goals, Habits & Badges</button>
+    <button class="nav-btn" onclick="openModulePage('team-mgmt', this)"><i class="fa-solid fa-users-gear text-primary"></i> Team & Performance</button>
+    <button class="nav-btn" onclick="openModulePage('crm-hiring', this)"><i class="fa-solid fa-handshake text-warning"></i> CRM, Competitors & Hiring</button>
+    <button class="nav-btn" onclick="openModulePage('chat-meetings', this)"><i class="fa-solid fa-comments text-info"></i> Team Chat & Meetings</button>
+    <button class="nav-btn" onclick="openModulePage('analytics-center', this)"><i class="fa-solid fa-chart-line text-success"></i> Analytics Center</button>
+    <button class="nav-btn mb-4" onclick="openModulePage('admin-panel', this)"><i class="fa-solid fa-shield-halved text-danger"></i> Export, Backup & Admin</button>
+  </aside>
+
+  <!-- MAIN VIEWPORT -->
+  <div class="main-area">
+    <header class="top-header">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-sm btn-outline-secondary d-lg-none" onclick="document.getElementById('sidebarMenu').classList.toggle('open')">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="search-bar-btn" onclick="openModulePage('memory-engine', document.querySelector('[data-page=memory-engine]'))">
+          <span><i class="fa-solid fa-magnifying-glass text-info me-2"></i>Memory Recovery Search...</span>
+          <kbd class="badge bg-dark border border-secondary">Ctrl + K</kbd>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn-brand" data-bs-toggle="modal" data-bs-target="#quickAddModal"><i class="fa-solid fa-plus me-1"></i> Capture</button>
+        <a href="/login" class="btn btn-sm btn-outline-info rounded-3 px-3 py-2"><i class="fa-solid fa-user-Astronaut me-1"></i> Auth</a>
+        <button class="btn btn-sm btn-outline-light rounded-3 px-3 py-2" id="themeSwitchBtn" onclick="toggleColorMode()"><i class="fa-solid fa-sun"></i></button>
+      </div>
+    </header>
+
+    <!-- 1. MAIN DASHBOARD PAGE -->
+    <section id="page-dashboard" class="module-page active">
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+          <span class="pill-badge pill-violet mb-1">FOUNDER OPERATING SYSTEM</span>
+          <h2 class="fw-bold mb-0">BIGKNOWLEDGE Executive Command</h2>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/api/export/json" class="btn btn-outline-info btn-sm rounded-3 px-3 py-2">Export JSON Backup</a>
+          <a href="/api/export/csv" class="btn btn-outline-success btn-sm rounded-3 px-3 py-2">Export Startups CSV</a>
+        </div>
+      </div>
+      <div class="row g-3 mb-4" id="dashboardKpiContainer"></div>
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="glass-card h-100">
+            <h5 class="fw-bold mb-3">Weekly Knowledge Growth & Execution Velocity</h5>
+            <canvas id="dashboardVelocityChart" height="120"></canvas>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="glass-card h-100">
+            <h5 class="fw-bold mb-3">Startup Scoreboard</h5>
+            <div id="startupScoreboardContainer" class="d-flex flex-column gap-3"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. MEMORY RECOVERY ENGINE PAGE -->
+    <section id="page-memory-engine" class="module-page">
+      <div class="glass-card mb-4">
+        <span class="pill-badge pill-amber mb-2">GLOBAL NEURAL SEARCH</span>
+        <h3 class="fw-bold">Memory Recovery Engine</h3>
+        <input type="text" id="memorySearchInput" class="form-control form-control-lg mt-2" placeholder="Search across Notes, Startups, Videos, Documents, Problems, Solutions..." oninput="executeMemorySearch()">
+      </div>
+      <div class="row g-3" id="memoryResultsContainer"></div>
+    </section>
+
+    <!-- 3. KNOWLEDGE GRAPH PAGE -->
+    <section id="page-knowledge-graph" class="module-page">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <span class="pill-badge pill-violet">INTERACTIVE GRAPH DATABASE</span>
+          <h3 class="fw-bold mb-0">Knowledge Graph: Problem → Solution → Idea → Startup → Revenue</h3>
+        </div>
+        <button class="btn-brand" onclick="renderKnowledgeGraphCanvas()">Redraw Graph</button>
+      </div>
+      <canvas id="knowledgeGraphCanvas" width="1140" height="480"></canvas>
+    </section>
+
+    <!-- 4. MIND MAP SYSTEM PAGE -->
+    <section id="page-mind-map" class="module-page">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <span class="pill-badge pill-emerald">VISUAL THINKING TOOL</span>
+          <h3 class="fw-bold mb-0">Interactive Mind Map System</h3>
+        </div>
+        <button class="btn-brand" onclick="renderMindMapCanvas()">Refresh Mind Map</button>
+      </div>
+      <canvas id="mindMapCanvas" width="1140" height="480"></canvas>
+    </section>
+
+    <!-- 5. KNOWLEDGE VAULT PAGE -->
+    <section id="page-knowledge-vault" class="module-page">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold mb-0">Knowledge Vault</h3>
+        <select id="vaultFilterSelect" class="form-select w-auto" onchange="renderKnowledgeVault()">
+          <option value="ALL">All Categories</option>
+          <option value="Note">Notes</option>
+          <option value="Research">Research</option>
+          <option value="Video">Videos</option>
+          <option value="Image">Images</option>
+          <option value="Document">Documents</option>
+        </select>
+      </div>
+      <div class="row g-3" id="knowledgeVaultContainer"></div>
+    </section>
+
+    <!-- 6. VIDEO VAULT PAGE -->
+    <section id="page-video-vault" class="module-page">
+      <h3 class="fw-bold mb-3">Video Vault (Embedded YouTube & Course Notes)</h3>
+      <div class="row g-4" id="videoVaultList"></div>
+    </section>
+
+    <!-- 7. IMAGE VAULT PAGE -->
+    <section id="page-image-vault" class="module-page">
+      <h3 class="fw-bold mb-3">Image Vault (Screenshots, Startup Designs & Diagrams)</h3>
+      <div class="row g-4" id="imageVaultList"></div>
+    </section>
+
+    <!-- 8. DOCUMENT VAULT PAGE -->
+    <section id="page-document-vault" class="module-page">
+      <h3 class="fw-bold mb-3">Document Vault (PDF, DOCX, PPTX)</h3>
+      <div class="row g-4" id="documentVaultList"></div>
+    </section>
+
+    <!-- 9. REFERENCE IMAGE SYSTEM PAGE -->
+    <section id="page-reference-system" class="module-page">
+      <div class="glass-card">
+        <span class="pill-badge pill-cyan mb-2">VISUAL INSPIRATION ENGINE</span>
+        <h3 class="fw-bold">Reference Image & Wireframe System</h3>
+        <p class="text-secondary">Upload UI screenshots or wireframes to extract layout and color DNA.</p>
+        <input type="file" class="form-control mb-3" accept="image/*" onchange="analyzeUploadedReference(event)">
+        <div id="refAnalysisResult" class="row g-4 align-items-center d-none">
+          <div class="col-md-6"><img id="refImagePreviewEl" class="img-fluid rounded-4 border border-info"></div>
+          <div class="col-md-6">
+            <div class="p-3 rounded-4 bg-dark border border-secondary">
+              <h5 class="text-info fw-bold">Extracted Visual DNA</h5>
+              <p class="small mb-1"><b>Palette:</b> #7C3AED, #0EA5E9, #10B981, #0F172A</p>
+              <p class="small mb-0"><b>Architecture:</b> Glassmorphic Floating Cards + High-Contrast Telemetry</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. PROBLEM COLLECTION CENTER PAGE -->
+    <section id="page-problem-center" class="module-page">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="glass-card">
+            <h5 class="fw-bold mb-3">Capture New Problem</h5>
+            <form onsubmit="handleAddProblem(event)">
+              <input type="text" id="pTitle" class="form-control mb-2" placeholder="Problem Title" required>
+              <select id="pSource" class="form-select mb-2">
+                <option>Real World Observation</option><option>Play Store Reviews</option><option>Reddit</option><option>YouTube Comments</option><option>Customer Feedback</option>
+              </select>
+              <textarea id="pRoot" class="form-control mb-2" rows="2" placeholder="Root Cause" required></textarea>
+              <textarea id="pSol" class="form-control mb-2" rows="2" placeholder="Proposed Solution" required></textarea>
+              <input type="number" id="pDemand" class="form-control mb-2" min="1" max="10" value="9">
+              <input type="text" id="pRev" class="form-control mb-2" value="$10M ARR">
+              <div class="form-check mb-3">
+                <input type="checkbox" id="pAutoStartup" class="form-check-input" checked>
+                <label class="form-check-label small">Auto-Convert to Startup Idea</label>
+              </div>
+              <button class="btn-brand w-100">Save Problem</button>
+            </form>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="glass-card">
+            <h5 class="fw-bold mb-3">Problem Repository</h5>
+            <div id="problemCollectionList" class="d-flex flex-column gap-3"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. PROBLEM TO STARTUP ENGINE PAGE -->
+    <section id="page-problem-engine" class="module-page">
+      <h3 class="fw-bold mb-3">Problem → Solution → Idea → Startup Engine</h3>
+      <div id="problemToStartupContainer" class="d-flex flex-column gap-3"></div>
+    </section>
+
+    <!-- 12. SOLUTION DATABASE PAGE -->
+    <section id="page-solution-db" class="module-page">
+      <h3 class="fw-bold mb-3">Solution Database</h3>
+      <div class="row g-3" id="solutionDbContainer"></div>
+    </section>
+
+    <!-- 13. INNOVATION HUB PAGE -->
+    <section id="page-innovation-hub" class="module-page">
+      <h3 class="fw-bold mb-3">Innovation Hub (Technologies, Research Papers & Future Trends)</h3>
+      <div class="row g-3" id="innovationHubContainer"></div>
+    </section>
+
+   <!-- 14. STARTUP IDEAS DATABASE PAGE (WITH REAL ADD FORM) -->
+    <section id="page-startup-db" class="module-page">
+      <div class="glass-card mb-4">
+        <h5 class="fw-bold mb-3">+ Add Your Real Startup to Scoreboard & Database</h5>
+        <form onsubmit="handleAddStartupDirect(event)" class="row g-2">
+          <div class="col-md-3"><input type="text" id="stName" class="form-control" placeholder="Startup Name (e.g. B2Conecter)" required></div>
+          <div class="col-md-3"><input type="text" id="stDesc" class="form-control" placeholder="Short Description" required></div>
+          <div class="col-md-2"><input type="text" id="stRevModel" class="form-control" placeholder="Plan (e.g. ₹199-₹799)" required></div>
+          <div class="col-md-2"><input type="text" id="stMarketSize" class="form-control" placeholder="Market (e.g. ₹50Cr)" required></div>
+          <div class="col-md-2">
+            <select id="stStage" class="form-select">
+              <option>Idea</option><option>Research</option><option>Validation</option><option selected>MVP</option><option>Development</option><option>Launch</option>
+            </select>
+          </div>
+          <div class="col-md-3"><input type="number" id="stScore" class="form-control" placeholder="Feasibility Score (1-100)" value="92" min="1" max="100"></div>
+          <div class="col-md-3"><input type="number" id="stProgress" class="form-control" placeholder="Current Progress %" value="65" min="0" max="100"></div>
+          <div class="col-md-6"><button type="submit" class="btn-brand w-100">Add to Startup Scoreboard</button></div>
+        </form>
+      </div>
+      <div class="row g-3" id="startupIdeasContainer"></div>
+    </section>
+    <!-- 15. ACTIVE STARTUP WORKSPACE PAGE -->
+    <section id="page-active-startup" class="module-page">
+      <div class="glass-card border-primary mb-4">
+        <span class="pill-badge pill-emerald">ACTIVE EXECUTION WORKSPACE</span>
+        <h2 class="fw-bold mt-1">BIGKNOWLEDGE & B2Conecter Flagship Sprint</h2>
+        <p class="text-secondary">Current Goal: Production Deployment on Render with PostgreSQL + Cloudinary Storage</p>
+        <div class="progress" style="height:10px;"><div class="progress-bar bg-info" style="width:82%"></div></div>
+      </div>
+    </section>
+
+    <!-- 16. BUSINESS MODEL CANVAS PAGE -->
+    <section id="page-bmc-canvas" class="module-page">
+      <h3 class="fw-bold mb-3">Business Model Canvas</h3>
+      <div class="bmc-container">
+        <div class="bmc-block"><h6 class="text-info fw-bold">Key Partners</h6><p class="small text-secondary">Cloud Providers, Startup Incubators, Merchant Networks.</p></div>
+        <div class="bmc-block"><h6 class="text-info fw-bold">Key Activities</h6><p class="small text-secondary">Full-Stack Engineering, Problem Validation, AI Indexing.</p></div>
+        <div class="bmc-block"><h6 class="text-warning fw-bold">Value Proposition</h6><p class="small text-secondary">Lifelong Second Brain + End-to-End Startup Execution OS.</p></div>
+        <div class="bmc-block"><h6 class="text-info fw-bold">Customer Relationships</h6><p class="small text-secondary">Self-serve SaaS, Founder Community, Automated Insights.</p></div>
+        <div class="bmc-block"><h6 class="text-success fw-bold">Customer Segments</h6><p class="small text-secondary">Founders, Entrepreneurs, Researchers, Product Teams.</p></div>
+        <div class="bmc-block"><h6 class="text-primary fw-bold">Key Resources</h6><p class="small text-secondary">Knowledge Graph Engine, Multi-Tenant PostgreSQL DB.</p></div>
+        <div class="bmc-block"><h6 class="text-primary fw-bold">Channels</h6><p class="small text-secondary">Direct Web SaaS, Hackathons, Founder Referrals.</p></div>
+        <div class="bmc-block"><h6 class="text-danger fw-bold">Cost Structure</h6><p class="small text-secondary">Cloud Compute, Database Storage, CDN Bandwidth.</p></div>
+        <div class="bmc-block" style="grid-column: span 2;"><h6 class="text-success fw-bold">Revenue Streams</h6><p class="small text-secondary">Tiered SaaS Plans (₹199 - ₹799 & $19 - $49/mo Enterprise).</p></div>
+      </div>
+    </section>
+
+    <!-- 17. PROJECT MANAGEMENT PAGE -->
+    <section id="page-project-mgmt" class="module-page">
+      <h3 class="fw-bold mb-3">Project Management (Tasks, Deadlines & Dependencies)</h3>
+      <div class="glass-card table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+          <thead><tr><th>Task</th><th>Project</th><th>Status</th><th>Priority</th><th>Deadline</th><th>Dependencies</th><th>Assignee</th></tr></thead>
+          <tbody id="projectTasksTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+   <!-- 18. KANBAN BOARD PAGE (WITH REAL TASK ADD FORM) -->
+    <section id="page-kanban-board" class="module-page">
+      <div class="glass-card mb-4">
+        <h5 class="fw-bold mb-3">+ Add Real Execution Task to Kanban</h5>
+        <form onsubmit="handleAddTaskDirect(event)" class="row g-2">
+          <div class="col-md-4"><input type="text" id="tkTitle" class="form-control" placeholder="Task Name" required></div>
+          <div class="col-md-2"><input type="text" id="tkProject" class="form-control" placeholder="Startup Name" required></div>
+          <div class="col-md-2">
+            <select id="tkStage" class="form-select">
+              <option>Ideas</option><option>Researching</option><option>Planning</option><option selected>Building</option><option>Testing</option><option>Completed</option>
+            </select>
+          </div>
+          <div class="col-md-2"><select id="tkPriority" class="form-select"><option>Critical</option><option selected>High</option><option>Medium</option></select></div>
+          <div class="col-md-2"><input type="date" id="tkDeadline" class="form-control" required></div>
+          <div class="col-12"><button type="submit" class="btn-brand">Add Task to Board</button></div>
+        </form>
+      </div>
+      <div class="kanban-grid" id="kanbanBoardGrid"></div>
+    </section>
+
+    <!-- 19. ROADMAP BUILDER PAGE -->
+    <section id="page-roadmap-builder" class="module-page">
+      <h3 class="fw-bold mb-3">Roadmap Builder (Startup, Product & Learning Roadmaps)</h3>
+      <div id="roadmapListContainer"></div>
+    </section>
+
+    <!-- 20. FOUNDER & DECISION JOURNAL PAGE -->
+    <section id="page-journals" class="module-page">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="glass-card">
+            <h5 class="fw-bold mb-3">Log Journal / Decision</h5>
+            <form onsubmit="handleAddJournal(event)">
+              <select id="jEntryType" class="form-select mb-2"><option>Founder Journal</option><option>Decision Journal</option></select>
+              <select id="jCatTag" class="form-select mb-2"><option>Daily Work</option><option>Learning</option><option>Failure</option><option>Discovery</option><option>Decision</option></select>
+              <input type="text" id="jTitleInput" class="form-control mb-2" placeholder="Title / Decision" required>
+              <textarea id="jDetailsInput" class="form-control mb-2" rows="3" placeholder="Reasoning & Details" required></textarea>
+              <input type="text" id="jExpectedInput" class="form-control mb-2" placeholder="Expected Outcome">
+              <input type="text" id="jActualInput" class="form-control mb-3" placeholder="Actual Result">
+              <button class="btn-brand w-100">Save Entry</button>
+            </form>
+          </div>
+        </div>
+        <div class="col-lg-8"><div id="journalsListContainer" class="d-flex flex-column gap-3"></div></div>
+      </div>
+    </section>
+
+    <!-- 21. GOALS, HABITS & ACHIEVEMENTS PAGE -->
+    <section id="page-goals-habits" class="module-page">
+      <h3 class="fw-bold mb-3">Goals System, Habit Tracker & Achievement Badges</h3>
+      <div class="row g-3 mb-4" id="goalsHabitsContainer"></div>
+    </section>
+
+    <!-- 22. TEAM MANAGEMENT & PERFORMANCE PAGE -->
+    <section id="page-team-mgmt" class="module-page">
+      <h3 class="fw-bold mb-3">Team Management & Performance Monitoring</h3>
+      <div class="row g-3" id="teamMembersContainer"></div>
+    </section>
+
+    <!-- 23. PERSONAL CRM, COMPETITORS & HIRING PAGE -->
+    <section id="page-crm-hiring" class="module-page">
+      <h3 class="fw-bold mb-3">Personal CRM, Competitor Analysis & Hiring Pipeline</h3>
+      <div class="row g-3" id="personalCrmContainer"></div>
+    </section>
+
+    <!-- 24. TEAM CHAT & MEETINGS PAGE -->
+    <section id="page-chat-meetings" class="module-page">
+      <div class="glass-card">
+        <h5 class="fw-bold mb-3">Real-Time Team Chat & Meeting Action Items</h5>
+        <div id="teamChatFeed" class="d-flex flex-column gap-2 mb-3" style="max-height:300px; overflow-y:auto;">
+          <div class="p-2 rounded bg-dark border border-secondary"><b class="text-info">@Founder:</b> Modular CSS, JS, and SQLAlchemy schema deployed.</div>
+        </div>
+        <div class="input-group">
+          <input type="text" id="teamChatInput" class="form-control" placeholder="Type message or @mention...">
+          <button class="btn-brand" onclick="postTeamChatMessage()">Send</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 25. ANALYTICS CENTER PAGE -->
+    <section id="page-analytics-center" class="module-page">
+      <h3 class="fw-bold mb-3">Enterprise Analytics Center</h3>
+      <div class="glass-card"><canvas id="analyticsCenterChart" height="110"></canvas></div>
+    </section>
+
+    <!-- 26. ADMIN, EXPORT & BACKUP PAGE -->
+    <section id="page-admin-panel" class="module-page">
+      <div class="glass-card">
+        <h3 class="fw-bold mb-3">Admin Control Panel & Full Vault Export</h3>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="/api/export/json" class="btn-brand text-decoration-none"><i class="fa-solid fa-file-code me-1"></i> Export JSON Backup</a>
+          <a href="/api/export/csv" class="btn btn-outline-info"><i class="fa-solid fa-file-csv me-1"></i> Export CSV / Excel</a>
+          <button class="btn btn-outline-warning" onclick="window.print()"><i class="fa-solid fa-file-pdf me-1"></i> Print / Save PDF</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- QUICK ADD MODAL -->
+<div class="modal fade" id="quickAddModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-card">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Quick Capture to BIGKNOWLEDGE</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="handleAddKnowledge(event)">
+          <input type="text" id="qkTitle" class="form-control mb-2" placeholder="Title" required>
+          <select id="qkCategory" class="form-select mb-2">
+            <option value="Note">Note</option><option value="Research">Research</option><option value="Video">Video</option><option value="Image">Image</option><option value="Document">Document (PDF)</option>
+          </select>
+          <textarea id="qkContent" class="form-control mb-2" rows="3" placeholder="Content / Notes" required></textarea>
+          <input type="text" id="qkMediaUrl" class="form-control mb-2" placeholder="Optional YouTube Embed or Cloudinary Image URL">
+          <input type="text" id="qkTags" class="form-control mb-3" value="startup,secondbrain">
+          <button type="submit" class="btn-brand w-100">Save to Vault</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- External Modular JS -->
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
