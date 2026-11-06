@@ -122,7 +122,7 @@ function renderExecutiveDashboard() {
               <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="deleteStartup(${st.id})" title="Delete"><i class="fa-solid fa-trash"></i></button>
             </div>
           </div>
-          <div class="small text-secondary mb-2">${st.stage} • ${st.revenue_model} (${st.market_size})</div>
+          <div class="small text-secondary mb-2">${st.stage} | ${st.revenue_model} (${st.market_size})</div>
           <div class="d-flex align-items-center gap-2">
             <input type="range" class="form-range" min="0" max="100" value="${st.progress}" onchange="updateStartupProgress(${st.id}, this.value)">
             <span class="small fw-bold" style="min-width:42px;">${st.progress}%</span>
