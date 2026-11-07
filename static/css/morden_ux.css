@@ -1,0 +1,255 @@
+/* ==========================================================================
+   BIGKNOWLEDGE — 2026 ULTRA-PROFESSIONAL UX & DESIGN SYSTEM UPGRADE
+   File: static/css/modern_ux_2026.css
+   Inspired by: Linear, Raycast, Vercel, Notion & Stripe Dashboard
+   ========================================================================== */
+
+/* 1. Smooth Micro-Transitions & Crisp Typography */
+body {
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+}
+
+.glass-card {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(124, 58, 237, 0.45);
+  box-shadow: 0 18px 40px -12px rgba(124, 58, 237, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+
+/* 2. Collapsible Slim Sidebar (Icon-Only Mode) */
+body.sidebar-collapsed .sidebar {
+  width: 78px;
+}
+
+body.sidebar-collapsed .sidebar .brand-box div:not(.brand-icon),
+body.sidebar-collapsed .sidebar .nav-group-label,
+body.sidebar-collapsed .sidebar .ux-mode-box span {
+  display: none !important;
+}
+
+body.sidebar-collapsed .sidebar .nav-btn {
+  justify-content: center;
+  padding: 0.7rem 0;
+  font-size: 0;
+}
+
+body.sidebar-collapsed .sidebar .nav-btn i {
+  font-size: 1.15rem;
+  margin: 0;
+}
+
+body.sidebar-collapsed .main-area {
+  margin-left: 78px;
+}
+
+/* 3. Simple Mode vs Pro Mode Filter (Hides Complex Tabs for Beginners) */
+body.ux-simple-mode .pro-only-nav {
+  display: none !important;
+}
+
+/* 4. Top Breadcrumb & Context Bar */
+.ux-breadcrumb-bar {
+  background: rgba(15, 23, 42, 0.55);
+  border-bottom: 1px solid var(--border-glass);
+  padding: 0.55rem 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+}
+
+[data-theme="light"] .ux-breadcrumb-bar {
+  background: rgba(241, 245, 249, 0.85);
+}
+
+/* 5. Raycast / Linear Style Command Palette Modal (Alt + K) */
+#uxCommandPaletteOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 13, 22, 0.78);
+  backdrop-filter: blur(12px);
+  z-index: 9990;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10vh;
+}
+
+#uxCommandPaletteOverlay.show {
+  display: flex;
+  animation: fadeInFast 0.15s ease;
+}
+
+.cmd-palette-box {
+  width: 620px;
+  max-width: 92vw;
+  background: #111827;
+  border: 1px solid rgba(124, 58, 237, 0.5);
+  border-radius: 18px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+}
+
+.cmd-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.1rem 1.3rem;
+  color: #fff;
+  font-size: 1.05rem;
+  outline: none;
+}
+
+.cmd-list {
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.cmd-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  color: #E2E8F0;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.cmd-item:hover,
+.cmd-item.selected {
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.35), rgba(14, 165, 233, 0.15));
+  color: #fff;
+}
+
+/* 6. Modern Animated Toast Notifications */
+#uxToastContainer {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ux-toast {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(16px);
+  border-left: 4px solid #10B981;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  border-right: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  padding: 0.85rem 1.2rem;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 280px;
+  animation: slideInRight 0.25s ease;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInFast {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* 7. Floating Speed-Dial Action Button (Bottom Right) */
+.ux-fab-dock {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 1035;
+}
+
+.ux-fab-main {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7C3AED, #0EA5E9);
+  color: #fff;
+  border: none;
+  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.55);
+  font-size: 1.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.ux-fab-main:hover {
+  transform: scale(1.08) rotate(90deg);
+}
+
+.ux-fab-menu {
+  position: absolute;
+  bottom: 66px;
+  right: 0;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 190px;
+}
+
+.ux-fab-dock.open .ux-fab-menu {
+  display: flex;
+}
+
+/* 8. Mobile Native Bottom Navigation Bar */
+.ux-mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 62px;
+  background: rgba(9, 13, 22, 0.96);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-glass);
+  z-index: 1045;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.ux-mob-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.68rem;
+  gap: 3px;
+}
+
+.ux-mob-btn i {
+  font-size: 1.1rem;
+}
+
+.ux-mob-btn.active, .ux-mob-btn:hover {
+  color: #0EA5E9;
+}
+
+@media (max-width: 991px) {
+  body.sidebar-collapsed .main-area { margin-left: 0; }
+  .ux-mobile-bottom-nav { display: flex; }
+  .main-area { padding-bottom: 70px; }
+  .ux-fab-dock { bottom: 76px; right: 18px; }
+}

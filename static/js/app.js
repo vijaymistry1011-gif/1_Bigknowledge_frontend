@@ -1,9 +1,3 @@
-// ==========================================
-// 0. API CONFIGURATION (Yahan apna Render URL daalein)
-// Dhyan dein: URL ke aakhir mein slash (/) MAT lagana
-// ==========================================
-const API_BASE_URL = "https://bigknowledge-backend-1.onrender.com"; 
-
 let DB = {
   knowledge: [],
   problems: [],
@@ -48,8 +42,7 @@ function toggleColorMode() {
 
 async function syncDatabase() {
   try {
-    // UPDATED: Added API_BASE_URL
-    const response = await fetch(`${API_BASE_URL}/api/bootstrap`);
+    const response = await fetch("/api/bootstrap");
     DB = await response.json();
     renderAllPages();
     updateRealTimeCharts(); // Database se real chart update karega
@@ -122,7 +115,7 @@ function renderExecutiveDashboard() {
               <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="deleteStartup(${st.id})" title="Delete"><i class="fa-solid fa-trash"></i></button>
             </div>
           </div>
-          <div class="small text-secondary mb-2">${st.stage} | ${st.revenue_model} (${st.market_size})</div>
+          <div class="small text-secondary mb-2">${st.stage} • ${st.revenue_model} (${st.market_size})</div>
           <div class="d-flex align-items-center gap-2">
             <input type="range" class="form-range" min="0" max="100" value="${st.progress}" onchange="updateStartupProgress(${st.id}, this.value)">
             <span class="small fw-bold" style="min-width:42px;">${st.progress}%</span>
@@ -134,8 +127,7 @@ function renderExecutiveDashboard() {
 }
 
 async function updateStartupProgress(id, newProgress) {
-  // UPDATED: Added API_BASE_URL
-  await fetch(`${API_BASE_URL}/api/startups`, {
+  await fetch("/api/startups", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id: id, progress: Number(newProgress) })
@@ -144,8 +136,7 @@ async function updateStartupProgress(id, newProgress) {
 }
 
 async function deleteStartup(id) {
-  // UPDATED: Added API_BASE_URL
-  await fetch(`${API_BASE_URL}/api/startups?id=${id}`, { method: "DELETE" });
+  await fetch(`/api/startups?id=${id}`, { method: "DELETE" });
   syncDatabase();
 }
 
@@ -348,8 +339,7 @@ function renderKnowledgeVault() {
 }
 
 async function deleteKnowledge(id) {
-  // UPDATED: Added API_BASE_URL
-  await fetch(`${API_BASE_URL}/api/knowledge?id=${id}`, { method: "DELETE" });
+  await fetch(`/api/knowledge?id=${id}`, { method: "DELETE" });
   syncDatabase();
 }
 
@@ -512,15 +502,13 @@ function renderTasksAndKanban() {
 }
 
 async function deleteTask(id) {
-  // UPDATED: Added API_BASE_URL
-  await fetch(`${API_BASE_URL}/api/tasks?id=${id}`, { method: "DELETE" });
+  await fetch(`/api/tasks?id=${id}`, { method: "DELETE" });
   syncDatabase();
 }
 
 async function handleKanbanDrop(e, targetStage) {
   const id = Number(e.dataTransfer.getData("text/plain"));
-  // UPDATED: Added API_BASE_URL
-  await fetch(`${API_BASE_URL}/api/tasks`, {
+  await fetch("/api/tasks", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id, kanban_stage: targetStage })
@@ -573,8 +561,7 @@ function executeMemorySearch() {
 // Form Handlers
 async function handleAddKnowledge(e) {
   e.preventDefault();
-  // UPDATED: Added API_BASE_URL
-  await fetch(`${API_BASE_URL}/api/knowledge`, {
+  await fetch("/api/knowledge", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -592,8 +579,7 @@ async function handleAddKnowledge(e) {
 
 async function handleAddProblem(e) {
   e.preventDefault();
-  // UPDATED: Added API_BASE_URL
-  await fetch(`${API_BASE_URL}/api/problems`, {
+  await fetch("/api/problems", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -612,8 +598,7 @@ async function handleAddProblem(e) {
 
 async function handleAddStartupDirect(e) {
   e.preventDefault();
-  // UPDATED: Added API_BASE_URL
-  await fetch(`${API_BASE_URL}/api/startups`, {
+  await fetch("/api/startups", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -632,8 +617,7 @@ async function handleAddStartupDirect(e) {
 
 async function handleAddTaskDirect(e) {
   e.preventDefault();
-  // UPDATED: Added API_BASE_URL
-  await fetch(`${API_BASE_URL}/api/tasks`, {
+  await fetch("/api/tasks", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -650,8 +634,7 @@ async function handleAddTaskDirect(e) {
 
 async function handleAddJournal(e) {
   e.preventDefault();
-  // UPDATED: Added API_BASE_URL
-  await fetch(`${API_BASE_URL}/api/journals`, {
+  await fetch("/api/journals", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
