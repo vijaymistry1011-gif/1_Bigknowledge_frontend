@@ -16,7 +16,7 @@ let chiptuneInterval = null;
 let audioCtx = null;
 
 // 🔴 YAHAN APNA ACTUAL RENDER URL DAALEIN (e.g., "https://bigknowledge-backend.onrender.com")
-const API_BASE_URL = "https://bigknowledge-backend-2.onrender.com";
+var API_BASE_URL = "https://bigknowledge-backend-2.onrender.com";
 
 // 1. Inject Sidebar Navigation & Dedicated Pages for All New Power Tools
 function initPowerAddonsSuite() {
