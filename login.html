@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication — BIGKNOWLEDGE Founder OS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body class="d-flex align-items-center justify-content-center min-vh-100 p-3">
+
+  <div class="glass-card" style="max-width: 460px; width: 100%;">
+    <div class="text-center mb-4">
+      <div class="brand-icon mx-auto mb-3"><i class="fa-solid fa-brain"></i></div>
+      <h3 class="fw-bold mb-1">BIGKNOWLEDGE</h3>
+      <p class="small text-secondary mb-0">Private Founder OS & Second Brain</p>
+    </div>
+
+    <ul class="nav nav-pills nav-fill mb-3 bg-dark p-1 rounded-3" role="tablist">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-login">Owner Login</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-signup">Sign Up</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-reset">Reset</button></li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Restricted Owner Login Form -->
+      <div class="tab-pane fade show active" id="tab-login">
+        <form onsubmit="handleOwnerLogin(event)">
+          <div class="mb-3">
+            <label class="small text-secondary">Founder Email</label>
+            <input type="email" id="loginEmail" class="form-control" placeholder="Enter owner email" required>
+          </div>
+          <div class="mb-3">
+            <label class="small text-secondary">Master Password</label>
+            <input type="password" id="loginPass" class="form-control" placeholder="Enter password" required>
+          </div>
+          <button type="submit" class="btn-brand w-100 mb-3"><i class="fa-solid fa-lock me-2"></i>Secure Login</button>
+        </form>
+      </div>
+
+      <!-- Blocked Signup Form -->
+      <div class="tab-pane fade" id="tab-signup">
+        <form onsubmit="handleBlockSignup(event)">
+          <div class="mb-2"><label class="small text-secondary">Full Name</label><input type="text" class="form-control" placeholder="Name" required></div>
+          <div class="mb-2"><label class="small text-secondary">Email</label><input type="email" class="form-control" placeholder="email@domain.com" required></div>
+          <div class="mb-2"><label class="small text-secondary">Role</label><select class="form-select"><option>Guest</option></select></div>
+          <div class="mb-3"><label class="small text-secondary">Password</label><input type="password" class="form-control" required></div>
+          <button type="submit" class="btn-secondary w-100" style="opacity: 0.7;">Create Account (Disabled)</button>
+        </form>
+      </div>
+
+      <!-- Blocked Forgot Password -->
+      <div class="tab-pane fade" id="tab-reset">
+        <form onsubmit="event.preventDefault(); alert('⛔ Action not allowed.');">
+          <div class="mb-3"><label class="small text-secondary">Registered Email</label><input type="email" class="form-control" required></div>
+          <button type="submit" class="btn-brand w-100">Send Password Reset Link</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // 🔴 Apna asli Login ID aur Password yahan set karein
+    const OWNER_EMAIL = "vijay@bigknowledge.io"; 
+    const OWNER_PASS = "Admin@2026";
+
+    function handleOwnerLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value;
+      const pass = document.getElementById("loginPass").value;
+
+      if(email === OWNER_EMAIL && pass === OWNER_PASS) {
+        // Correct credentials -> Redirect to Dashboard
+        window.location.href = '/';
+      } else {
+        // Wrong credentials -> Show Error
+        alert("⛔ Access Denied! Incorrect Email or Password. Only Mr. Vijay Mistry is authorized to access this system.");
+      }
+    }
+
+    function handleBlockSignup(e) {
+      e.preventDefault();
+      // Block new users from registering
+      alert("⛔ Registrations are CLOSED. This is a private system, only the Owner can log in.");
+    }
+  </script>
+</body>
+</html>

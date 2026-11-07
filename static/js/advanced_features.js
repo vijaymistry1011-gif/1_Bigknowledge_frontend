@@ -1,3 +1,6 @@
+// 🔴 YAHAN APNA ACTUAL RENDER URL DAALEIN (e.g., "https://bigknowledge-backend.onrender.com")
+const API_BASE_URL = "https://bigknowledge-backend-2.onrender.com"; 
+
 /* ==========================================================================
    BIGKNOWLEDGE — ADVANCED INTERACTIVE UPGRADE PACK (advanced_features.js)
    Plug & Play Engine: Adds Upload, Create, Delete, Hide-Delete Toggle,
@@ -73,14 +76,14 @@ async function uploadFileToServer(fileInputEl) {
   if (!fileInputEl || !fileInputEl.files || !fileInputEl.files[0]) return "";
   const formData = new FormData();
   formData.append("file", fileInputEl.files[0]);
-  const res = await fetch("/api/adv/upload_file", { method: "POST", body: formData });
+  const res = await fetch(`${API_BASE_URL}/api/adv/upload_file`, { method: "POST", body: formData });
   const data = await res.json();
   return data.url || "";
 }
 
 // 3. Universal Delete Function
 async function advDelete(moduleName, id) {
-  await fetch("/api/adv/delete", {
+  await fetch(`${API_BASE_URL}/api/adv/delete`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ module: moduleName, id: id })
@@ -91,7 +94,7 @@ async function advDelete(moduleName, id) {
 
 // 4. Load Custom Store (Graph, MindMap, BMC, Active Workspace, References)
 async function loadAdvStore() {
-  const res = await fetch("/api/adv/store");
+  const res = await fetch(`${API_BASE_URL}/api/adv/store`);
   ADV_STORE = await res.json();
   renderInteractiveBMC();
   renderActiveStartupWorkspaceAdv();
@@ -101,7 +104,7 @@ async function loadAdvStore() {
 }
 
 async function saveAdvStore(partialData) {
-  await fetch("/api/adv/store", {
+  await fetch(`${API_BASE_URL}/api/adv/store`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(partialData)
@@ -124,7 +127,7 @@ function injectAllAdvancedToolbars() {
     topBtnGroup.prepend(delToggle);
   }
 
-  // A. Knowledge Graph Interactive Toolbar (Add Node, Link Node, Upload/Download JSON, Delete Node)
+  // A. Knowledge Graph Interactive Toolbar
   const kgPage = document.getElementById("page-knowledge-graph");
   if (kgPage && !document.getElementById("kgAdvToolbar")) {
     kgPage.insertAdjacentHTML("afterbegin", `
@@ -151,7 +154,7 @@ function injectAllAdvancedToolbars() {
     `);
   }
 
-  // B. Mind Map Interactive Toolbar (Add Branch, Upload Mind Map Image, Delete Branch)
+  // B. Mind Map Interactive Toolbar
   const mmPage = document.getElementById("page-mind-map");
   if (mmPage && !document.getElementById("mmAdvToolbar")) {
     mmPage.insertAdjacentHTML("afterbegin", `
@@ -188,7 +191,7 @@ function injectAllAdvancedToolbars() {
     `);
   }
 
-  // D. Video Vault Upload Bar (YouTube URL OR Local MP4 Video File Upload)
+  // D. Video Vault Upload Bar
   const vvPage = document.getElementById("page-video-vault");
   if (vvPage && !document.getElementById("vvUploadToolbar")) {
     vvPage.insertAdjacentHTML("afterbegin", `
@@ -221,7 +224,7 @@ function injectAllAdvancedToolbars() {
     `);
   }
 
-  // F. Document Vault Upload Bar (PDF, PPTX, DOCX)
+  // F. Document Vault Upload Bar
   const dvPage = document.getElementById("page-document-vault");
   if (dvPage && !document.getElementById("dvUploadToolbar")) {
     dvPage.insertAdjacentHTML("afterbegin", `
@@ -576,7 +579,7 @@ async function submitAdvancedVideo(e) {
   } else if (mediaUrl.includes("watch?v=")) {
     mediaUrl = mediaUrl.replace("watch?v=", "embed/");
   }
-  await fetch("/api/knowledge", {
+  await fetch(`${API_BASE_URL}/api/knowledge`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -594,7 +597,7 @@ async function submitAdvancedVideo(e) {
 async function submitAdvancedImage(e) {
   e.preventDefault();
   const url = await uploadFileToServer(document.getElementById("ivFile"));
-  await fetch("/api/knowledge", {
+  await fetch(`${API_BASE_URL}/api/knowledge`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -612,7 +615,7 @@ async function submitAdvancedImage(e) {
 async function submitAdvancedDocument(e) {
   e.preventDefault();
   const url = await uploadFileToServer(document.getElementById("dvFile"));
-  await fetch("/api/knowledge", {
+  await fetch(`${API_BASE_URL}/api/knowledge`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -630,7 +633,7 @@ async function submitAdvancedDocument(e) {
 async function submitReferenceInspiration(e) {
   e.preventDefault();
   const url = await uploadFileToServer(document.getElementById("rfFile"));
-  await fetch("/api/adv/create", {
+  await fetch(`${API_BASE_URL}/api/adv/create`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -671,7 +674,7 @@ async function submitAdvModule(e, moduleName) {
   const formData = new FormData(e.target);
   const payload = { module: moduleName };
   formData.forEach((v, k) => payload[k] = v);
-  await fetch("/api/adv/create", {
+  await fetch(`${API_BASE_URL}/api/adv/create`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -1072,7 +1075,7 @@ function injectKanbanToolbar() {
 
 async function createNewKanbanTask(e) {
   e.preventDefault();
-  await fetch("/api/tasks", {
+  await fetch(`${API_BASE_URL}/api/tasks`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

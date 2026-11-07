@@ -1,3 +1,5 @@
+// 🔴 YAHAN APNA ACTUAL RENDER URL DAALEIN (e.g., "https://bigknowledge-backend.onrender.com")
+const API_BASE_URL = "https://bigknowledge-backend-2.onrender.com";
 let DB = {
   knowledge: [],
   problems: [],
@@ -42,10 +44,10 @@ function toggleColorMode() {
 
 async function syncDatabase() {
   try {
-    const response = await fetch("/api/bootstrap");
+    const response = await fetch(`${API_BASE_URL}/api/bootstrap`);
     DB = await response.json();
     renderAllPages();
-    updateRealTimeCharts(); // Database se real chart update karega
+    updateRealTimeCharts(); 
   } catch (err) {
     console.error("Database sync failed:", err);
   }
@@ -64,7 +66,6 @@ function renderAllPages() {
   renderKnowledgeGraphCanvas();
 }
 
-// 1. REAL EXECUTIVE DASHBOARD & INTERACTIVE STARTUP SCOREBOARD
 function renderExecutiveDashboard() {
   const videosCount = DB.knowledge.filter(k => k.category === "Video").length;
   const imagesCount = DB.knowledge.filter(k => k.category === "Image").length;
@@ -100,7 +101,6 @@ function renderExecutiveDashboard() {
     `).join("");
   }
 
-  // Real Interactive Startup Scoreboard
   const scoreboard = document.getElementById("startupScoreboardContainer");
   if (scoreboard) {
     if (DB.startups.length === 0) {
@@ -115,7 +115,8 @@ function renderExecutiveDashboard() {
               <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="deleteStartup(${st.id})" title="Delete"><i class="fa-solid fa-trash"></i></button>
             </div>
           </div>
-          <div class="small text-secondary mb-2">${st.stage} • ${st.revenue_model} (${st.market_size})</div>
+          <div class="small text-secondary mb-2">${st.stage}
+${st.revenue_model} (${st.market_size})</div>
           <div class="d-flex align-items-center gap-2">
             <input type="range" class="form-range" min="0" max="100" value="${st.progress}" onchange="updateStartupProgress(${st.id}, this.value)">
             <span class="small fw-bold" style="min-width:42px;">${st.progress}%</span>
@@ -127,7 +128,7 @@ function renderExecutiveDashboard() {
 }
 
 async function updateStartupProgress(id, newProgress) {
-  await fetch("/api/startups", {
+  await fetch(`${API_BASE_URL}/api/startups`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id: id, progress: Number(newProgress) })
@@ -136,11 +137,10 @@ async function updateStartupProgress(id, newProgress) {
 }
 
 async function deleteStartup(id) {
-  await fetch(`/api/startups?id=${id}`, { method: "DELETE" });
+  await fetch(`${API_BASE_URL}/api/startups?id=${id}`, { method: "DELETE" });
   syncDatabase();
 }
 
-// 2. REAL-TIME CHARTS (Connected to Actual Database Counts)
 function updateRealTimeCharts() {
   const realCounts = [
     DB.knowledge.length,
@@ -201,7 +201,6 @@ function updateRealTimeCharts() {
   }
 }
 
-// 3. REAL DYNAMIC KNOWLEDGE GRAPH (Draws actual DB Problems, Solutions, and Startups)
 function renderKnowledgeGraphCanvas() {
   const canvas = document.getElementById("knowledgeGraphCanvas");
   if (!canvas) return;
@@ -219,24 +218,20 @@ function renderKnowledgeGraphCanvas() {
   const nodes = [];
   const links = [];
 
-  // Central Brain Node
   nodes.push({ x: 130, y: 240, label: "BIGKNOWLEDGE\nCORE BRAIN", color: "#7C3AED" });
 
-  // Add Real Problems from DB
   DB.problems.slice(0, 4).forEach((p, idx) => {
     const yPos = 90 + idx * 100;
     nodes.push({ x: 420, y: yPos, label: "PROBLEM:\n" + p.title.slice(0, 16), color: "#F59E0B" });
     links.push([0, nodes.length - 1]);
   });
 
-  // Add Real Solutions from DB
   DB.solutions.slice(0, 4).forEach((s, idx) => {
     const yPos = 90 + idx * 100;
     nodes.push({ x: 720, y: yPos, label: "SOLUTION:\n" + s.solution_title.slice(0, 16), color: "#0EA5E9" });
     links.push([Math.min(idx + 1, nodes.length - 2), nodes.length - 1]);
   });
 
-  // Add Real Startups from DB
   DB.startups.slice(0, 4).forEach((st, idx) => {
     const yPos = 90 + idx * 100;
     nodes.push({ x: 1000, y: yPos, label: `STARTUP (${st.progress}%):\n` + st.name.slice(0, 16), color: "#10B981" });
@@ -307,7 +302,6 @@ function renderMindMapCanvas() {
   });
 }
 
-// 4. Knowledge Vault & Media Renderers
 function renderKnowledgeVault() {
   const filter = document.getElementById("vaultFilterSelect")?.value || "ALL";
   const items = filter === "ALL" ? DB.knowledge : DB.knowledge.filter(k => k.category === filter);
@@ -339,7 +333,7 @@ function renderKnowledgeVault() {
 }
 
 async function deleteKnowledge(id) {
-  await fetch(`/api/knowledge?id=${id}`, { method: "DELETE" });
+  await fetch(`${API_BASE_URL}/api/knowledge?id=${id}`, { method: "DELETE" });
   syncDatabase();
 }
 
@@ -502,13 +496,13 @@ function renderTasksAndKanban() {
 }
 
 async function deleteTask(id) {
-  await fetch(`/api/tasks?id=${id}`, { method: "DELETE" });
+  await fetch(`${API_BASE_URL}/api/tasks?id=${id}`, { method: "DELETE" });
   syncDatabase();
 }
 
 async function handleKanbanDrop(e, targetStage) {
   const id = Number(e.dataTransfer.getData("text/plain"));
-  await fetch("/api/tasks", {
+  await fetch(`${API_BASE_URL}/api/tasks`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id, kanban_stage: targetStage })
@@ -558,10 +552,9 @@ function executeMemorySearch() {
   }
 }
 
-// Form Handlers
 async function handleAddKnowledge(e) {
   e.preventDefault();
-  await fetch("/api/knowledge", {
+  await fetch(`${API_BASE_URL}/api/knowledge`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -579,7 +572,7 @@ async function handleAddKnowledge(e) {
 
 async function handleAddProblem(e) {
   e.preventDefault();
-  await fetch("/api/problems", {
+  await fetch(`${API_BASE_URL}/api/problems`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -598,7 +591,7 @@ async function handleAddProblem(e) {
 
 async function handleAddStartupDirect(e) {
   e.preventDefault();
-  await fetch("/api/startups", {
+  await fetch(`${API_BASE_URL}/api/startups`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -617,7 +610,7 @@ async function handleAddStartupDirect(e) {
 
 async function handleAddTaskDirect(e) {
   e.preventDefault();
-  await fetch("/api/tasks", {
+  await fetch(`${API_BASE_URL}/api/tasks`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -634,7 +627,7 @@ async function handleAddTaskDirect(e) {
 
 async function handleAddJournal(e) {
   e.preventDefault();
-  await fetch("/api/journals", {
+  await fetch(`${API_BASE_URL}/api/journals`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

@@ -10,6 +10,9 @@
    - Meeting Scheduler, Live Speech-to-Text Dictation, Action Checklist & AI Summary
    ========================================================================== */
 
+// 🔴 YAHAN APNA ACTUAL RENDER URL DAALEIN (e.g., "https://bigknowledge-backend.onrender.com")
+const API_BASE_URL = "https://bigknowledge-backend-2.onrender.com"; 
+
 let CHAT_STATE = {
   channels: [],
   messages: [],
@@ -322,7 +325,7 @@ function switchCollabSubTab(tabName) {
 }
 
 async function refreshChatMeetingState() {
-  const res = await fetch("/api/chat/bootstrap");
+  const res = await fetch(`${API_BASE_URL}/api/chat/bootstrap`);
   CHAT_STATE = await res.json();
   if (!ACTIVE_MEETING_ID && CHAT_STATE.meetings.length > 0) {
     ACTIVE_MEETING_ID = CHAT_STATE.meetings[0].id;
@@ -368,7 +371,7 @@ async function promptNewChannel() {
   const name = prompt("Enter new channel name (e.g. marketing-growth, sih-hackathon):");
   if (!name) return;
   const topic = prompt("Enter channel topic / purpose:", "Team Execution & Updates");
-  await fetch("/api/chat/channels", {
+  await fetch(`${API_BASE_URL}/api/chat/channels`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, topic })
@@ -377,7 +380,7 @@ async function promptNewChannel() {
 }
 
 async function deleteChannelPro(cid) {
-  await fetch(`/api/chat/channels?id=${cid}`, { method: "DELETE" });
+  await fetch(`${API_BASE_URL}/api/chat/channels?id=${cid}`, { method: "DELETE" });
   ACTIVE_CHANNEL = "core-architecture";
   await refreshChatMeetingState();
 }
@@ -411,10 +414,8 @@ function renderMessagesStream() {
   }
 
   stream.innerHTML = msgs.map(m => {
-    // Format @mentions in neon cyan
     const formattedText = (m.text || "").replace(/(@\w+)/g, '<b class="text-info">$1</b>');
 
-    // Attachment / Media Renderer
     let attachmentHtml = "";
     if (m.media_url) {
       if (m.msg_type === "voice" || m.media_url.endsWith(".webm") || m.media_url.endsWith(".mp3") || m.media_url.endsWith(".wav")) {
@@ -426,12 +427,10 @@ function renderMessagesStream() {
       }
     }
 
-    // Code Block Renderer
     const codeHtml = m.code_snippet
       ? `<pre class="code-block-pre"><code>${m.code_snippet.replace(/</g, "&lt;")}</code></pre>`
       : "";
 
-    // Website Link Card Renderer
     const linkHtml = m.link_url
       ? `<div class="p-2 rounded bg-dark border border-info mt-2 d-flex justify-content-between align-items-center">
            <div>
@@ -442,7 +441,6 @@ function renderMessagesStream() {
          </div>`
       : "";
 
-    // Interactive Poll Renderer
     let pollHtml = "";
     if (m.poll_data && m.poll_data.options) {
       const totalVotes = m.poll_data.options.reduce((acc, o) => acc + o.votes, 0) || 1;
@@ -470,7 +468,6 @@ function renderMessagesStream() {
       `;
     }
 
-    // Emoji Reactions Bar
     const existingReacts = Object.entries(m.reactions || {}).map(([emo, cnt]) =>
       `<span class="reaction-chip" onclick="interactChatMsg(${m.id}, 'react', '${emo}')">${emo} ${cnt}</span>`
     ).join("");
@@ -526,7 +523,7 @@ async function sendRichChatMessage(e) {
 
   if (!textInp.value.trim() && !codeInp.value.trim() && !linkInp.value.trim()) return;
 
-  await fetch("/api/chat/messages", {
+  await fetch(`${API_BASE_URL}/api/chat/messages`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -553,7 +550,7 @@ async function sendFileAttachmentMessage(e) {
   const url = await uploadFileToServer(e.target);
   if (!url) return;
   const fname = e.target.files[0]?.name || "Shared Attachment";
-  await fetch("/api/chat/messages", {
+  await fetch(`${API_BASE_URL}/api/chat/messages`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -588,10 +585,10 @@ async function toggleVoiceNoteRecording() {
       const file = new File([blob], `voicenote_${Date.now()}.webm`, { type: "audio/webm" });
       const formData = new FormData();
       formData.append("file", file);
-      const upRes = await fetch("/api/adv/upload_file", { method: "POST", body: formData });
+      const upRes = await fetch(`${API_BASE_URL}/api/adv/upload_file`, { method: "POST", body: formData });
       const upData = await upRes.json();
 
-      await fetch("/api/chat/messages", {
+      await fetch(`${API_BASE_URL}/api/chat/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -621,7 +618,7 @@ async function sendPollMessage() {
   if (!q || !rawOpts) return;
 
   const options = rawOpts.split(",").map(o => ({ text: o.trim(), votes: 0 })).filter(o => o.text);
-  await fetch("/api/chat/messages", {
+  await fetch(`${API_BASE_URL}/api/chat/messages`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -643,7 +640,7 @@ async function interactChatMsg(id, action, extraVal) {
   const payload = { id, action };
   if (action === "react") payload.emoji = extraVal;
   if (action === "vote") payload.option_index = extraVal;
-  await fetch("/api/chat/interact", {
+  await fetch(`${API_BASE_URL}/api/chat/interact`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -652,12 +649,12 @@ async function interactChatMsg(id, action, extraVal) {
 }
 
 async function deleteChatMsg(id) {
-  await fetch(`/api/chat/messages?id=${id}`, { method: "DELETE" });
+  await fetch(`${API_BASE_URL}/api/chat/messages?id=${id}`, { method: "DELETE" });
   await refreshChatMeetingState();
 }
 
 async function pushMessageToKanban(titleText, assigneeName) {
-  await fetch("/api/chat/convert_to_task", {
+  await fetch(`${API_BASE_URL}/api/chat/convert_to_task`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ title: titleText, assignee: assigneeName })
@@ -678,7 +675,8 @@ function renderMeetingsSection() {
     <div class="p-2 rounded-3 border ${m.id === ACTIVE_MEETING_ID ? 'border-info bg-dark' : 'border-secondary'} d-flex justify-content-between align-items-center" style="cursor:pointer;" onclick="selectMeeting(${m.id})">
       <div>
         <div class="fw-bold small">${m.title}</div>
-        <small class="text-secondary" style="font-size:0.72rem;">${m.date} • ${m.time}</small>
+        <small class="text-secondary" style="font-size:0.72rem;">${m.date}
+${m.time}</small>
       </div>
       <div class="d-flex align-items-center gap-1">
         <span class="pill-badge pill-emerald" style="font-size:0.65rem;">${m.status}</span>
@@ -696,7 +694,8 @@ function renderMeetingsSection() {
   workEl.innerHTML = `
     <div class="d-flex flex-wrap justify-content-between align-items-start pb-3 mb-3 border-bottom border-secondary">
       <div>
-        <span class="pill-badge pill-cyan mb-1">${cur.date} at ${cur.time} • Host: ${cur.host}</span>
+        <span class="pill-badge pill-cyan mb-1">${cur.date} at ${cur.time}Host: 
+${cur.host}</span>
         <h4 class="fw-bold mb-1">${cur.title}</h4>
         <div class="small text-secondary"><i class="fa-solid fa-users me-1"></i>Attendees: ${cur.attendees}</div>
       </div>
@@ -756,7 +755,7 @@ function selectMeeting(id) {
 
 async function createNewMeetingPro(e) {
   e.preventDefault();
-  const res = await fetch("/api/chat/meetings", {
+  const res = await fetch(`${API_BASE_URL}/api/chat/meetings`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -777,7 +776,7 @@ async function createNewMeetingPro(e) {
 async function saveMeetingWorkspace(id, saveToVault) {
   const cur = CHAT_STATE.meetings.find(m => m.id === id);
   if (!cur) return;
-  await fetch("/api/chat/meetings", {
+  await fetch(`${API_BASE_URL}/api/chat/meetings`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -814,7 +813,7 @@ async function toggleMeetingAction(id, idx) {
 }
 
 async function deleteMeetingPro(id) {
-  await fetch(`/api/chat/meetings?id=${id}`, { method: "DELETE" });
+  await fetch(`${API_BASE_URL}/api/chat/meetings?id=${id}`, { method: "DELETE" });
   ACTIVE_MEETING_ID = null;
   await refreshChatMeetingState();
 }
@@ -826,7 +825,7 @@ function dictateMeetingNotes() {
   rec.lang = "en-IN";
   rec.onresult = (e) => {
     const notesBox = document.getElementById("editMtNotes");
-    notesBox.value += (notesBox.value ? "\n• " : "• ") + e.results[0][0].transcript;
+    notesBox.value += (notesBox.value ? "\n" : "• ") + e.results[0][0].transcript;
   };
   rec.start();
 }
@@ -834,7 +833,7 @@ function dictateMeetingNotes() {
 async function generateAIMeetingSummary(id) {
   const notes = document.getElementById("editMtNotes").value;
   const decisions = document.getElementById("editMtDecisions");
-  decisions.value = `⚡ AI EXECUTIVE SUMMARY:\n• Core Focus: ${notes.slice(0, 120) || "Architecture & Product Velocity"}...\n• Decision Locked: Prioritize high-feasibility MVP features & weekly customer validation.`;
+  decisions.value = `⚡ AI EXECUTIVE SUMMARY:\nCore Focus: ${notes.slice(0, 120) || "Architecture & Product Velocity"}...\nDecision Locked: Prioritize high-feasibility MVP features & weekly customer validation.`;
   await saveMeetingWorkspace(id, false);
 }
 

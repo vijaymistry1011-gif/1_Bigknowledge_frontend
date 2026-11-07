@@ -15,6 +15,9 @@ let isFocusRunning = false;
 let chiptuneInterval = null;
 let audioCtx = null;
 
+// 🔴 YAHAN APNA ACTUAL RENDER URL DAALEIN (e.g., "https://bigknowledge-backend.onrender.com")
+const API_BASE_URL = "https://bigknowledge-backend-2.onrender.com";
+
 // 1. Inject Sidebar Navigation & Dedicated Pages for All New Power Tools
 function initPowerAddonsSuite() {
   const sidebar = document.getElementById("sidebarMenu");
@@ -198,7 +201,7 @@ function initPowerAddonsSuite() {
 async function triggerAIPrompt(customText) {
   const promptText = customText || document.getElementById("aiUserPrompt").value || "Analyze my startup";
   const startupName = document.getElementById("aiStartupTarget")?.value || "BIGKNOWLEDGE";
-  const res = await fetch("/api/power/ai_cofounder", {
+  const res = await fetch(`${API_BASE_URL}/api/power/ai_cofounder`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ prompt: promptText, startup_name: startupName })
@@ -209,7 +212,7 @@ async function triggerAIPrompt(customText) {
 
 async function saveAIOutputToVault() {
   const content = document.getElementById("aiOutputBox").innerText;
-  await fetch("/api/knowledge", {
+  await fetch(`${API_BASE_URL}/api/knowledge`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -305,7 +308,7 @@ async function saveWhiteboardToImageVault() {
   const canvas = document.getElementById("whiteboardCanvas");
   const title = document.getElementById("wbSketchTitle").value || "System Architecture Sketch";
   const dataUrl = canvas.toDataURL("image/png");
-  await fetch("/api/power/save_sketch", {
+  await fetch(`${API_BASE_URL}/api/power/save_sketch`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ title: title, image_base64: dataUrl })
@@ -390,7 +393,7 @@ async function restoreBackupFile(e) {
   if (!file) return;
   const formData = new FormData();
   formData.append("file", file);
-  const res = await fetch("/api/power/restore_backup", { method: "POST", body: formData });
+  const res = await fetch(`${API_BASE_URL}/api/power/restore_backup`, { method: "POST", body: formData });
   const data = await res.json();
   alert(`Restored ${data.restored_items} items into your Second Brain!`);
   syncDatabase();
