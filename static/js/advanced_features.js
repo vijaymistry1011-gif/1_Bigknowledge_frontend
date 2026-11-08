@@ -1,61 +1,85 @@
-// 🔴 YAHAN APNA ACTUAL RENDER URL DAALEIN (e.g., "https://bigknowledge-backend.onrender.com")
-var API_BASE_URL = "https://bigknowledge-backend-2.onrender.com";
 /* ==========================================================================
-   BIGKNOWLEDGE — ADVANCED INTERACTIVE UPGRADE PACK (advanced_features.js)
-   Plug & Play Engine: Adds Upload, Create, Delete, Hide-Delete Toggle,
-   Zoom Lightbox, Reader Modal, Interactive Graph/MindMap & Editable BMC
+   BIGKNOWLEDGE — ADVANCED INTERACTIVE UPGRADE PACK (static/js/advanced_feature.js)
+   Fixed: Zero Function Collisions, Instant Local + Server Save, Working Video/Photo
+   Uploads, Interactive Graph/MindMap Dragging & Editable BMC
    ========================================================================== */
 
-let ADV_STORE = {
-  graph_nodes: [],
-  graph_links: [],
-  mindmap_nodes: [],
-  bmc: {},
-  active_workspace: {},
+var API_BASE_URL = window.API_BASE_URL || "https://bigknowledge-backend-2.onrender.com";
+
+const DEFAULT_ADV_STORE = {
+  graph_nodes: [
+    { id: 1, label: "Problem: Local Kirana Offline", x: 180, y: 220, color: "#F59E0B" },
+    { id: 2, label: "Solution: Digital Storefront", x: 480, y: 150, color: "#0EA5E9" },
+    { id: 3, label: "Startup: B2Conecter SaaS", x: 780, y: 220, color: "#7C3AED" },
+    { id: 4, label: "Revenue: ₹199-₹799/mo", x: 1000, y: 220, color: "#10B981" }
+  ],
+  graph_links: [[1, 2], [2, 3], [3, 4]],
+  mindmap_nodes: [
+    { id: 101, label: "BIGKNOWLEDGE OS", x: 560, y: 240, color: "#7C3AED" },
+    { id: 102, label: "B2Conecter SaaS", parent: 101, x: 250, y: 120, color: "#0EA5E9" },
+    { id: 103, label: "AI Second Brain", parent: 101, x: 870, y: 120, color: "#10B981" },
+    { id: 104, label: "Execution Kanban", parent: 101, x: 250, y: 360, color: "#F59E0B" },
+    { id: 105, label: "Revenue Engine", parent: 101, x: 870, y: 360, color: "#EF4444" }
+  ],
+  bmc: {
+    partners: "Cloud Providers, Local Kirana Associations, Delivery Partners",
+    activities: "Product Engineering, Merchant Onboarding, AI R&D",
+    value: "All-in-One Second Brain for Founders & Digital Storefront for Vendors",
+    relationships: "24/7 AI Assisted Support, Founder Community",
+    segments: "Startup Founders, SMB Shopkeepers, Creators",
+    resources: "Full-Stack Flask + JS Engine, Cloud DB",
+    channels: "Direct Web App, YouTube (busi.tech), Referrals",
+    costs: "Server Hosting, Domain, API Compute",
+    revenue: "Tiered SaaS Subscriptions (₹199 / ₹399 / ₹799 per month)"
+  },
+  active_workspace: {
+    startup_name: "BIGKNOWLEDGE & B2Conecter",
+    goal: "Complete Full-Stack Production Launch & Onboard First 50 Users",
+    problem: "Founders lose track of ideas & local vendors lack digital tools",
+    solution: "Unified Founder OS + Multi-Vendor Storefront SaaS",
+    milestones: "1. Frontend Polish  2. Render API Sync  3. Beta Launch",
+    progress: 78,
+    hours: 145
+  },
   references: []
 };
+
+let ADV_STORE = JSON.parse(localStorage.getItem("BK_ADV_STORE") || "null") || DEFAULT_ADV_STORE;
+window.ADV_STORE = ADV_STORE;
 
 let HIDE_DELETE_BUTTONS = false;
 let currentZoomLevel = 1;
 let draggingGraphNode = null;
 let draggingMindNode = null;
 
-// CSS Inject for Delete Button Hide/Show, Image Zoom & Interactive Controls
+function saveLocalAdvStore() {
+  localStorage.setItem("BK_ADV_STORE", JSON.stringify(ADV_STORE));
+  window.ADV_STORE = ADV_STORE;
+}
+
+// Inject CSS for Delete Button Toggle, Lightbox & Toolbars
 const advStyle = document.createElement("style");
 advStyle.innerHTML = `
   body.hide-delete-mode .adv-del-btn { display: none !important; }
-  .adv-del-btn {
-    padding: 2px 8px;
-    font-size: 0.75rem;
-    border-radius: 6px;
-  }
+  .adv-del-btn { padding: 2px 8px; font-size: 0.75rem; border-radius: 6px; }
   .zoomable-img-card img {
-    height: 210px;
-    width: 100%;
-    object-fit: cover;
-    cursor: zoom-in;
-    transition: transform 0.2s ease;
+    height: 210px; width: 100%; object-fit: cover;
+    cursor: zoom-in; transition: transform 0.2s ease;
   }
-  .zoomable-img-card img:hover {
-    transform: scale(1.02);
-  }
+  .zoomable-img-card img:hover { transform: scale(1.02); }
   #lightboxImg {
     transition: transform 0.2s ease;
-    max-height: 80vh;
-    max-width: 90vw;
-    border-radius: 12px;
+    max-height: 80vh; max-width: 90vw; border-radius: 12px;
   }
   .adv-toolbar {
     background: rgba(15, 23, 42, 0.75);
     border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 14px;
-    padding: 0.9rem 1.2rem;
-    margin-bottom: 1.2rem;
+    border-radius: 14px; padding: 0.9rem 1.2rem; margin-bottom: 1.2rem;
   }
 `;
 document.head.appendChild(advStyle);
 
-// 1. Toggle Hide / Show All Delete Buttons Across Website
+// 1. Toggle Hide / Show All Delete Buttons
 function toggleDeleteButtonsVisibility() {
   HIDE_DELETE_BUTTONS = !HIDE_DELETE_BUTTONS;
   document.body.classList.toggle("hide-delete-mode", HIDE_DELETE_BUTTONS);
@@ -70,31 +94,83 @@ function toggleDeleteButtonsVisibility() {
   }
 }
 
-// 2. Universal File Upload Helper
+// 2. Universal File Upload Helper (With Instant Local Fallback if Backend Sleeps)
 async function uploadFileToServer(fileInputEl) {
   if (!fileInputEl || !fileInputEl.files || !fileInputEl.files[0]) return "";
-  const formData = new FormData();
-  formData.append("file", fileInputEl.files[0]);
-  const res = await fetch(`${API_BASE_URL}/api/adv/upload_file`, { method: "POST", body: formData });
-  const data = await res.json();
-  return data.url || "";
+  const file = fileInputEl.files[0];
+
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${API_BASE_URL}/api/adv/upload_file`, { method: "POST", body: formData });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.url) return window.resolveMediaUrl ? window.resolveMediaUrl(data.url) : data.url;
+    }
+  } catch (err) {
+    console.warn("Server upload fallback to local DataURL/ObjectURL:", err);
+  }
+
+  // Fallback: For images/docs under 3MB, convert to Base64 DataURL so it saves in localStorage
+  if (file.size < 3 * 1024 * 1024) {
+    return await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+  // For large MP4 videos, create instant playable blob URL
+  return URL.createObjectURL(file);
 }
 
-// 3. Universal Delete Function
+// 3. Universal Delete Function (Works Offline & Online)
 async function advDelete(moduleName, id) {
-  await fetch(`${API_BASE_URL}/api/adv/delete`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ module: moduleName, id: id })
-  });
-  await loadAdvStore();
-  await syncDatabase();
-}
+  if (moduleName === "knowledge") DB.knowledge = DB.knowledge.filter(x => x.id !== id);
+  if (moduleName === "problem") DB.problems = DB.problems.filter(x => x.id !== id);
+  if (moduleName === "solution") DB.solutions = DB.solutions.filter(x => x.id !== id);
+  if (moduleName === "innovation") DB.innovations = (DB.innovations || []).filter(x => x.id !== id);
+  if (moduleName === "roadmap") DB.roadmaps = (DB.roadmaps || []).filter(x => x.id !== id);
+  if (moduleName === "journal") DB.journals = (DB.journals || []).filter(x => x.id !== id);
+  if (moduleName === "goal") DB.goals_habits = (DB.goals_habits || []).filter(x => x.id !== id);
+  if (moduleName === "crm") DB.org_crm = (DB.org_crm || []).filter(x => x.id !== id);
+  if (moduleName === "task") DB.tasks = (DB.tasks || []).filter(x => x.id !== id);
+  if (moduleName === "reference") {
+    ADV_STORE.references = (ADV_STORE.references || []).filter(x => x.id !== id);
+    saveLocalAdvStore();
+    renderSavedReferencesAdv();
+  }
 
-// 4. Load Custom Store (Graph, MindMap, BMC, Active Workspace, References)
+  if (window.saveLocalCache) saveLocalCache();
+  if (window.renderAllPages) renderAllPages();
+
+  try {
+    await fetch(`${API_BASE_URL}/api/adv/delete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ module: moduleName, id: id })
+    });
+  } catch (e) {}
+}
+window.advDelete = advDelete;
+
+// 4. Load & Save Custom Store
 async function loadAdvStore() {
-  const res = await fetch(`${API_BASE_URL}/api/adv/store`);
-  ADV_STORE = await res.json();
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/adv/store`);
+    if (res.ok) {
+      const serverStore = await res.json();
+      ADV_STORE = {
+        graph_nodes: serverStore.graph_nodes?.length ? serverStore.graph_nodes : ADV_STORE.graph_nodes,
+        graph_links: serverStore.graph_links?.length ? serverStore.graph_links : ADV_STORE.graph_links,
+        mindmap_nodes: serverStore.mindmap_nodes?.length ? serverStore.mindmap_nodes : ADV_STORE.mindmap_nodes,
+        bmc: Object.keys(serverStore.bmc || {}).length ? serverStore.bmc : ADV_STORE.bmc,
+        active_workspace: Object.keys(serverStore.active_workspace || {}).length ? serverStore.active_workspace : ADV_STORE.active_workspace,
+        references: serverStore.references || ADV_STORE.references || []
+      };
+      saveLocalAdvStore();
+    }
+  } catch (e) {}
+
   renderInteractiveBMC();
   renderActiveStartupWorkspaceAdv();
   renderSavedReferencesAdv();
@@ -103,19 +179,25 @@ async function loadAdvStore() {
 }
 
 async function saveAdvStore(partialData) {
-  await fetch(`${API_BASE_URL}/api/adv/store`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(partialData)
-  });
-  await loadAdvStore();
+  ADV_STORE = { ...ADV_STORE, ...partialData };
+  saveLocalAdvStore();
+  renderInteractiveBMC();
+  renderActiveStartupWorkspaceAdv();
+  renderSavedReferencesAdv();
+  drawInteractiveGraph();
+  drawInteractiveMindMap();
+
+  try {
+    await fetch(`${API_BASE_URL}/api/adv/store`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(partialData)
+    });
+  } catch (e) {}
 }
 
-// =========================================================================
-// INJECT TOOLBARS, MODALS & ADVANCED CONTROLS INTO ALL PAGES AUTOMATICALLY
-// =========================================================================
+// 5. Inject Toolbars Into All Pages
 function injectAllAdvancedToolbars() {
-  // Add Global "Hide/Show Delete" Button in Top Bar
   const topBtnGroup = document.querySelector(".top-header .d-flex:last-child");
   if (topBtnGroup && !document.getElementById("toggleDelBtn")) {
     const delToggle = document.createElement("button");
@@ -126,7 +208,7 @@ function injectAllAdvancedToolbars() {
     topBtnGroup.prepend(delToggle);
   }
 
-  // A. Knowledge Graph Interactive Toolbar
+  // A. Knowledge Graph Toolbar
   const kgPage = document.getElementById("page-knowledge-graph");
   if (kgPage && !document.getElementById("kgAdvToolbar")) {
     kgPage.insertAdjacentHTML("afterbegin", `
@@ -148,12 +230,12 @@ function injectAllAdvancedToolbars() {
             <label class="btn btn-outline-success btn-sm w-50 mb-0">Upload Graph <input type="file" hidden accept=".json,image/*" onchange="importGraphFile(event)"></label>
           </div>
         </div>
-        <small class="text-secondary d-block mt-2"><i class="fa-solid fa-hand-pointer text-info me-1"></i>Tip: Aap kisi bhi Node ko mouse se pakad kar (Drag & Drop) kahin bhi hila sakte hain!</small>
+        <small class="text-secondary d-block mt-2"><i class="fa-solid fa-hand-pointer text-info me-1"></i>Tip: Kisi bhi Node ko mouse se pakad kar (Drag & Drop) kahin bhi move karein!</small>
       </div>
     `);
   }
 
-  // B. Mind Map Interactive Toolbar
+  // B. Mind Map Toolbar
   const mmPage = document.getElementById("page-mind-map");
   if (mmPage && !document.getElementById("mmAdvToolbar")) {
     mmPage.insertAdjacentHTML("afterbegin", `
@@ -179,7 +261,7 @@ function injectAllAdvancedToolbars() {
     `);
   }
 
-  // C. Knowledge Vault Search & Reader Bar
+  // C. Knowledge Vault Search Bar
   const kvPage = document.getElementById("page-knowledge-vault");
   if (kvPage && !document.getElementById("kvSearchInput")) {
     kvPage.insertAdjacentHTML("afterbegin", `
@@ -198,16 +280,16 @@ function injectAllAdvancedToolbars() {
         <h6 class="fw-bold text-info mb-2"><i class="fa-solid fa-video me-2"></i>Add YouTube Video URL or Upload MP4 Video File</h6>
         <form onsubmit="submitAdvancedVideo(event)" class="row g-2">
           <div class="col-md-3"><input type="text" id="vvTitle" class="form-control" placeholder="Video Title" required></div>
-          <div class="col-md-3"><input type="text" id="vvUrl" class="form-control" placeholder="YouTube URL (optional if uploading)"></div>
+          <div class="col-md-3"><input type="text" id="vvUrl" class="form-control" placeholder="YouTube URL (optional if uploading file)"></div>
           <div class="col-md-3"><input type="file" id="vvFile" class="form-control" accept="video/*"></div>
           <div class="col-md-2"><input type="text" id="vvNotes" class="form-control" placeholder="Key Notes / Category"></div>
-          <div class="col-md-1"><button class="btn-brand w-100">Save</button></div>
+          <div class="col-md-1"><button type="submit" class="btn-brand w-100">Save</button></div>
         </form>
       </div>
     `);
   }
 
-  // E. Image Vault HD Library Upload Bar
+  // E. Image Vault Upload Bar
   const ivPage = document.getElementById("page-image-vault");
   if (ivPage && !document.getElementById("ivUploadToolbar")) {
     ivPage.insertAdjacentHTML("afterbegin", `
@@ -217,7 +299,7 @@ function injectAllAdvancedToolbars() {
           <div class="col-md-3"><input type="text" id="ivTitle" class="form-control" placeholder="Photo / Diagram Title" required></div>
           <div class="col-md-4"><input type="file" id="ivFile" class="form-control" accept="image/*" required></div>
           <div class="col-md-3"><input type="text" id="ivDesc" class="form-control" placeholder="Category / Description"></div>
-          <div class="col-md-2"><button class="btn-brand w-100">Upload HD Photo</button></div>
+          <div class="col-md-2"><button type="submit" class="btn-brand w-100">Upload HD Photo</button></div>
         </form>
       </div>
     `);
@@ -233,7 +315,7 @@ function injectAllAdvancedToolbars() {
           <div class="col-md-3"><input type="text" id="dvTitle" class="form-control" placeholder="Save Document As (Name)" required></div>
           <div class="col-md-4"><input type="file" id="dvFile" class="form-control" accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.txt" required></div>
           <div class="col-md-3"><input type="text" id="dvDesc" class="form-control" placeholder="Summary / Notes"></div>
-          <div class="col-md-2"><button class="btn-brand w-100">Save Document</button></div>
+          <div class="col-md-2"><button type="submit" class="btn-brand w-100">Save Document</button></div>
         </form>
       </div>
     `);
@@ -254,7 +336,7 @@ function injectAllAdvancedToolbars() {
           </div>
           <div class="col-md-3"><input type="file" id="rfFile" class="form-control" accept="image/*" required></div>
           <div class="col-md-2"><input type="text" id="rfNotes" class="form-control" placeholder="Design Notes"></div>
-          <div class="col-md-2"><button class="btn-brand w-100">Save Reference</button></div>
+          <div class="col-md-2"><button type="submit" class="btn-brand w-100">Save Reference</button></div>
         </form>
         <div class="row g-3" id="refSavedGallery"></div>
       </div>
@@ -272,7 +354,7 @@ function injectAllAdvancedToolbars() {
           <div class="col-md-3"><input type="text" name="problem_title" class="form-control" placeholder="Related Problem" required></div>
           <div class="col-md-2"><input type="text" name="cost_estimate" class="form-control" placeholder="Cost (e.g. ₹15,000)"></div>
           <div class="col-md-2"><input type="text" name="benefits" class="form-control" placeholder="Key Benefits"></div>
-          <div class="col-md-2"><button class="btn-brand w-100">Save Solution</button></div>
+          <div class="col-md-2"><button type="submit" class="btn-brand w-100">Save Solution</button></div>
         </form>
       </div>
     `);
@@ -293,7 +375,7 @@ function injectAllAdvancedToolbars() {
           </div>
           <div class="col-md-3"><input type="text" name="summary" class="form-control" placeholder="Core Summary" required></div>
           <div class="col-md-2"><input type="text" name="opportunity_note" class="form-control" placeholder="Startup Impact"></div>
-          <div class="col-md-2"><button class="btn-brand w-100">Add Innovation</button></div>
+          <div class="col-md-2"><button type="submit" class="btn-brand w-100">Add Innovation</button></div>
         </form>
       </div>
     `);
@@ -313,8 +395,8 @@ function injectAllAdvancedToolbars() {
           </div>
           <div class="col-md-3"><input type="text" name="title" class="form-control" placeholder="Milestone Title" required></div>
           <div class="col-md-3"><input type="text" name="dependencies" class="form-control" placeholder="Dependencies"></div>
-          <div class="col-md-2"><input type="date" name="deadline" class="form-control" required></div>
-          <div class="col-md-2"><button class="btn-brand w-100">Add Milestone</button></div>
+          <div class="col-md-2"><input type="date" name="deadline" class="form-control" value="2026-11-30" required></div>
+          <div class="col-md-2"><button type="submit" class="btn-brand w-100">Add Milestone</button></div>
         </form>
       </div>
     `);
@@ -333,8 +415,8 @@ function injectAllAdvancedToolbars() {
             </select>
           </div>
           <div class="col-md-5"><input type="text" name="title" class="form-control" placeholder="Goal or Habit Description" required></div>
-          <div class="col-md-2"><input type="number" name="streak_or_progress" class="form-control" placeholder="Streak / %" value="10"></div>
-          <div class="col-md-2"><button class="btn-brand w-100">Save Goal/Habit</button></div>
+          <div class="col-md-2"><input type="number" name="streak_or_progress" class="form-control" placeholder="Streak / %" value="50"></div>
+          <div class="col-md-2"><button type="submit" class="btn-brand w-100">Save Goal/Habit</button></div>
         </form>
       </div>
     `);
@@ -351,13 +433,13 @@ function injectAllAdvancedToolbars() {
           <div class="col-md-2"><input type="text" name="name" class="form-control" placeholder="Member Name" required></div>
           <div class="col-md-2">
             <select name="role_or_segment" class="form-select">
-              <option>Founder</option><option>Co-Founder</option><option>Admin</option><option>Manager</option><option>Team Lead</option><option>Developer</option><option>Designer</option><option>Researcher</option><option>Marketer</option><option>Sales Executive</option>
+              <option>Founder</option><option>Co-Founder</option><option>Admin</option><option>Manager</option><option>Team Lead</option><option>Developer</option><option>Designer</option><option>Researcher</option><option>Marketer</option>
             </select>
           </div>
           <div class="col-md-2"><input type="text" name="department_or_company" class="form-control" placeholder="Department / Startup" required></div>
           <div class="col-md-2"><input type="text" name="details_or_strengths" class="form-control" placeholder="Skills (Python, UI, etc.)"></div>
           <div class="col-md-2"><input type="number" name="productivity_score" class="form-control" placeholder="Productivity %" value="95"></div>
-          <div class="col-md-2"><button class="btn-brand w-100">Add Member</button></div>
+          <div class="col-md-2"><button type="submit" class="btn-brand w-100">Add Member</button></div>
         </form>
       </div>
     `);
@@ -379,16 +461,41 @@ function injectAllAdvancedToolbars() {
           <div class="col-md-2"><input type="text" name="role_or_segment" class="form-control" placeholder="Tier / Pricing / Role"></div>
           <div class="col-md-2"><input type="text" name="details_or_strengths" class="form-control" placeholder="Strengths / Notes"></div>
           <div class="col-md-2"><input type="text" name="weaknesses_or_actions" class="form-control" placeholder="Weakness / Action Item"></div>
-          <div class="col-md-2"><button class="btn-brand w-100">Save Record</button></div>
+          <div class="col-md-2"><button type="submit" class="btn-brand w-100">Save Record</button></div>
         </form>
       </div>
     `);
   }
 
-  // Inject Full Reader Modal & Image Zoom Lightbox Modal at bottom of body
+  // N. Kanban Add Task Bar
+  const kbPage = document.getElementById("page-kanban-board");
+  if (kbPage && !document.getElementById("kbAddTaskBar")) {
+    kbPage.insertAdjacentHTML("afterbegin", `
+      <div id="kbAddTaskBar" class="adv-toolbar">
+        <h6 class="fw-bold text-info mb-2"><i class="fa-solid fa-table-columns me-2"></i>+ Add New Execution Task to Kanban Board</h6>
+        <form onsubmit="handleAddTaskDirect(event)" class="row g-2">
+          <div class="col-md-3"><input type="text" id="kbTitle" class="form-control form-control-sm" placeholder="Task Name..." required></div>
+          <div class="col-md-2"><input type="text" id="kbProject" class="form-control form-control-sm" value="BIGKNOWLEDGE OS" required></div>
+          <div class="col-md-2">
+            <select id="kbStage" class="form-select form-select-sm">
+              <option value="Ideas">Ideas</option><option value="Researching">Researching</option><option value="Planning">Planning</option><option value="Building" selected>Building</option><option value="Testing">Testing</option><option value="Completed">Completed</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <select id="kbPriority" class="form-select form-select-sm">
+              <option value="Critical">Critical</option><option value="High" selected>High</option><option value="Medium">Medium</option><option value="Low">Low</option>
+            </select>
+          </div>
+          <div class="col-md-2"><input type="date" id="kbDeadline" class="form-control form-control-sm" value="2026-11-20" required></div>
+          <div class="col-md-1"><button type="submit" class="btn-brand btn-sm w-100">Add</button></div>
+        </form>
+      </div>
+    `);
+  }
+
+  // Modals for Note Reader & Image Zoom Lightbox
   if (!document.getElementById("noteReaderModal")) {
     document.body.insertAdjacentHTML("beforeend", `
-      <!-- Full Note Reader Modal -->
       <div class="modal fade" id="noteReaderModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
           <div class="modal-content glass-card">
@@ -405,7 +512,6 @@ function injectAllAdvancedToolbars() {
         </div>
       </div>
 
-      <!-- HD Image Zoom In / Out Lightbox Modal -->
       <div class="modal fade" id="imageZoomModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
           <div class="modal-content glass-card text-center">
@@ -428,45 +534,7 @@ function injectAllAdvancedToolbars() {
   }
 }
 
-// =========================================================================
-// OVERRIDE RENDER FUNCTIONS FOR FULL READER, ZOOM, UPLOAD & DELETE SUPPORT
-// =========================================================================
-
-// Knowledge Vault with Open/Read Modal & Delete
-renderKnowledgeVault = function() {
-  const filter = document.getElementById("vaultFilterSelect")?.value || "ALL";
-  const searchQ = (document.getElementById("kvSearchInput")?.value || "").toLowerCase();
-  const items = DB.knowledge.filter(k => {
-    const matchCat = filter === "ALL" || k.category === filter;
-    const matchQ = !searchQ || k.title.toLowerCase().includes(searchQ) || k.content.toLowerCase().includes(searchQ) || k.tags.toLowerCase().includes(searchQ);
-    return matchCat && matchQ;
-  });
-
-  const grid = document.getElementById("knowledgeVaultContainer");
-  if (!grid) return;
-
-  grid.innerHTML = items.map(k => `
-    <div class="col-md-6 col-lg-4">
-      <div class="glass-card h-100 d-flex flex-column justify-content-between">
-        <div>
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="pill-badge pill-violet">${k.category}</span>
-            <div class="d-flex gap-1">
-              <button class="btn btn-sm btn-outline-info py-0 px-2" onclick="openNoteReader(${k.id})"><i class="fa-solid fa-book-open me-1"></i>Read</button>
-              <button class="btn btn-sm btn-outline-danger adv-del-btn" onclick="advDelete('knowledge', ${k.id})"><i class="fa-solid fa-trash"></i></button>
-            </div>
-          </div>
-          <h5 class="fw-bold" style="cursor:pointer;" onclick="openNoteReader(${k.id})">${k.title}</h5>
-          <p class="small text-secondary">${k.content.slice(0, 140)}${k.content.length > 140 ? '...' : ''}</p>
-        </div>
-        <div class="d-flex flex-wrap gap-1 mt-2">
-          ${k.tags.split(",").map(t => `<span class="badge bg-dark border border-secondary">#${t.trim()}</span>`).join("")}
-        </div>
-      </div>
-    </div>
-  `).join("");
-};
-
+// Note Reader & Image Lightbox Functions
 function openNoteReader(id) {
   const item = DB.knowledge.find(k => k.id === id);
   if (!item) return;
@@ -474,89 +542,21 @@ function openNoteReader(id) {
   document.getElementById("readerTitle").innerText = item.title;
   document.getElementById("readerContent").innerText = item.content;
   const mediaBox = document.getElementById("readerMediaBox");
-  mediaBox.innerHTML = item.media_url ? `<a href="${item.media_url}" target="_blank" class="btn-brand btn-sm text-decoration-none">Open Attached Media / Link</a>` : "";
+  const resolvedUrl = window.resolveMediaUrl ? window.resolveMediaUrl(item.media_url) : item.media_url;
+  mediaBox.innerHTML = resolvedUrl ? `<a href="${resolvedUrl}" target="_blank" class="btn-brand btn-sm text-decoration-none">Open Attached Media / Link</a>` : "";
   new bootstrap.Modal(document.getElementById("noteReaderModal")).show();
 }
-
-// Media Vaults: Video (YouTube + MP4), Image (Zoom Lightbox), Document (PDF/PPTX Download + Delete)
-renderMediaVaults = function() {
-  const videoBox = document.getElementById("videoVaultList");
-  const imageBox = document.getElementById("imageVaultList");
-  const docBox = document.getElementById("documentVaultList");
-
-  if (videoBox) {
-    const videos = DB.knowledge.filter(k => k.category === "Video");
-    videoBox.innerHTML = videos.map(v => {
-      const isMp4 = v.media_url && (v.media_url.endsWith(".mp4") || v.media_url.startsWith("/static/uploads/"));
-      const playerHtml = isMp4
-        ? `<video controls class="w-100 rounded border border-secondary mb-3" style="max-height:260px;"><source src="${v.media_url}"></video>`
-        : `<div class="ratio ratio-16x9 rounded overflow-hidden mb-3 border border-secondary"><iframe src="${v.media_url}" allowfullscreen></iframe></div>`;
-      return `
-        <div class="col-md-6">
-          <div class="glass-card h-100">
-            ${playerHtml}
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <h6 class="fw-bold mb-1">${v.title}</h6>
-                <p class="small text-secondary mb-0">${v.content}</p>
-              </div>
-              <button class="btn btn-outline-danger adv-del-btn" onclick="advDelete('knowledge', ${v.id})"><i class="fa-solid fa-trash"></i></button>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  if (imageBox) {
-    const images = DB.knowledge.filter(k => k.category === "Image");
-    imageBox.innerHTML = images.map(img => `
-      <div class="col-md-4">
-        <div class="glass-card zoomable-img-card h-100">
-          <img src="${img.media_url}" class="rounded-3 mb-3 border border-secondary" alt="${img.title}" onclick="openImageZoomLightbox('${img.media_url}', '${img.title.replace(/'/g, "")}')">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="fw-bold mb-1">${img.title}</h6>
-              <p class="small text-secondary mb-0">${img.content}</p>
-            </div>
-            <div class="d-flex gap-1">
-              <button class="btn btn-sm btn-outline-info" onclick="openImageZoomLightbox('${img.media_url}', '${img.title.replace(/'/g, "")}')"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
-              <button class="btn btn-outline-danger adv-del-btn" onclick="advDelete('knowledge', ${img.id})"><i class="fa-solid fa-trash"></i></button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  if (docBox) {
-    const docs = DB.knowledge.filter(k => ["Document", "PDF"].includes(k.category));
-    docBox.innerHTML = docs.map(d => `
-      <div class="col-md-6">
-        <div class="glass-card d-flex justify-content-between align-items-center">
-          <div>
-            <span class="pill-badge pill-crimson mb-1">DOCUMENT / PPTX / PDF</span>
-            <h6 class="fw-bold mb-1">${d.title}</h6>
-            <p class="small text-secondary mb-0">${d.content}</p>
-          </div>
-          <div class="d-flex gap-2">
-            <a href="${d.media_url || '#'}" target="_blank" download class="btn btn-sm btn-outline-info"><i class="fa-solid fa-download me-1"></i>Open/Download</a>
-            <button class="btn btn-outline-danger adv-del-btn" onclick="advDelete('knowledge', ${d.id})"><i class="fa-solid fa-trash"></i></button>
-          </div>
-        </div>
-      </div>
-    `).join("");
-  }
-};
+window.openNoteReader = openNoteReader;
 
 function openImageZoomLightbox(url, title) {
   currentZoomLevel = 1;
   const img = document.getElementById("lightboxImg");
-  img.src = url;
+  img.src = window.resolveMediaUrl ? window.resolveMediaUrl(url) : url;
   img.style.transform = "scale(1)";
-  document.getElementById("zoomImgTitle").innerText = title;
+  document.getElementById("zoomImgTitle").innerText = title || "HD Preview";
   new bootstrap.Modal(document.getElementById("imageZoomModal")).show();
 }
+window.openImageZoomLightbox = openImageZoomLightbox;
 
 function adjustLightboxZoom(delta) {
   currentZoomLevel = Math.max(0.5, Math.min(3.5, currentZoomLevel + delta));
@@ -573,120 +573,168 @@ async function submitAdvancedVideo(e) {
   e.preventDefault();
   let mediaUrl = document.getElementById("vvUrl").value.trim();
   const fileEl = document.getElementById("vvFile");
-  if (fileEl.files.length > 0) {
+  if (fileEl && fileEl.files.length > 0) {
     mediaUrl = await uploadFileToServer(fileEl);
-  } else if (mediaUrl.includes("watch?v=")) {
-    mediaUrl = mediaUrl.replace("watch?v=", "embed/");
+  } else {
+    mediaUrl = window.resolveMediaUrl ? window.resolveMediaUrl(mediaUrl, "youtube") : mediaUrl;
   }
-  await fetch(`${API_BASE_URL}/api/knowledge`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title: document.getElementById("vvTitle").value,
-      category: "Video",
-      content: document.getElementById("vvNotes").value || "Saved Video",
-      media_url: mediaUrl,
-      tags: "video,vault"
-    })
-  });
+
+  const newVideo = {
+    id: Date.now(),
+    title: document.getElementById("vvTitle").value,
+    category: "Video",
+    content: document.getElementById("vvNotes").value || "Saved Video",
+    media_url: mediaUrl,
+    tags: "video,vault"
+  };
+
+  DB.knowledge.unshift(newVideo);
+  if (window.saveLocalCache) saveLocalCache();
   e.target.reset();
-  syncDatabase();
+  if (window.renderAllPages) renderAllPages();
+
+  try {
+    await fetch(`${API_BASE_URL}/api/knowledge`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newVideo)
+    });
+  } catch (err) {}
 }
 
 async function submitAdvancedImage(e) {
   e.preventDefault();
   const url = await uploadFileToServer(document.getElementById("ivFile"));
-  await fetch(`${API_BASE_URL}/api/knowledge`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title: document.getElementById("ivTitle").value,
-      category: "Image",
-      content: document.getElementById("ivDesc").value || "HD Image",
-      media_url: url,
-      tags: "image,hd"
-    })
-  });
+  const newImg = {
+    id: Date.now(),
+    title: document.getElementById("ivTitle").value,
+    category: "Image",
+    content: document.getElementById("ivDesc").value || "HD Image",
+    media_url: url,
+    tags: "image,hd"
+  };
+
+  DB.knowledge.unshift(newImg);
+  if (window.saveLocalCache) saveLocalCache();
   e.target.reset();
-  syncDatabase();
+  if (window.renderAllPages) renderAllPages();
+
+  try {
+    await fetch(`${API_BASE_URL}/api/knowledge`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newImg)
+    });
+  } catch (err) {}
 }
 
 async function submitAdvancedDocument(e) {
   e.preventDefault();
   const url = await uploadFileToServer(document.getElementById("dvFile"));
-  await fetch(`${API_BASE_URL}/api/knowledge`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title: document.getElementById("dvTitle").value,
-      category: "Document",
-      content: document.getElementById("dvDesc").value || "Uploaded Document / PPTX / PDF",
-      media_url: url,
-      tags: "document,ppt,pdf"
-    })
-  });
+  const newDoc = {
+    id: Date.now(),
+    title: document.getElementById("dvTitle").value,
+    category: "Document",
+    content: document.getElementById("dvDesc").value || "Uploaded Document / PPTX / PDF",
+    media_url: url,
+    tags: "document,ppt,pdf"
+  };
+
+  DB.knowledge.unshift(newDoc);
+  if (window.saveLocalCache) saveLocalCache();
   e.target.reset();
-  syncDatabase();
+  if (window.renderAllPages) renderAllPages();
+
+  try {
+    await fetch(`${API_BASE_URL}/api/knowledge`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newDoc)
+    });
+  } catch (err) {}
 }
 
 async function submitReferenceInspiration(e) {
   e.preventDefault();
   const url = await uploadFileToServer(document.getElementById("rfFile"));
-  await fetch(`${API_BASE_URL}/api/adv/create`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      module: "reference",
-      title: document.getElementById("rfTitle").value,
-      ref_type: document.getElementById("rfType").value,
-      image_url: url,
-      notes: document.getElementById("rfNotes").value
-    })
-  });
+  const newRef = {
+    id: Date.now(),
+    title: document.getElementById("rfTitle").value,
+    ref_type: document.getElementById("rfType").value,
+    image_url: url,
+    notes: document.getElementById("rfNotes").value
+  };
+
+  ADV_STORE.references = ADV_STORE.references || [];
+  ADV_STORE.references.unshift(newRef);
+  saveLocalAdvStore();
   e.target.reset();
-  loadAdvStore();
+  renderSavedReferencesAdv();
+
+  try {
+    await fetch(`${API_BASE_URL}/api/adv/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ module: "reference", ...newRef })
+    });
+  } catch (err) {}
 }
 
 function renderSavedReferencesAdv() {
   const box = document.getElementById("refSavedGallery");
   if (!box || !ADV_STORE.references) return;
-  box.innerHTML = ADV_STORE.references.map(r => `
-    <div class="col-md-4">
-      <div class="glass-card zoomable-img-card h-100">
-        <img src="${r.image_url}" class="rounded-3 mb-2 border border-info" onclick="openImageZoomLightbox('${r.image_url}', '${r.title}')">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <span class="pill-badge pill-cyan">${r.ref_type}</span>
-            <h6 class="fw-bold mt-1 mb-0">${r.title}</h6>
-            <small class="text-secondary">${r.notes}</small>
+  box.innerHTML = ADV_STORE.references.map(r => {
+    const imgUrl = window.resolveMediaUrl ? window.resolveMediaUrl(r.image_url) : r.image_url;
+    const safeTitle = (r.title || "Reference").replace(/'/g, "");
+    return `
+      <div class="col-md-4">
+        <div class="glass-card zoomable-img-card h-100">
+          <img src="${imgUrl}" class="rounded-3 mb-2 border border-info" onclick="openImageZoomLightbox('${imgUrl}', '${safeTitle}')">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="pill-badge pill-cyan">${r.ref_type}</span>
+              <h6 class="fw-bold mt-1 mb-0">${r.title}</h6>
+              <small class="text-secondary">${r.notes || ""}</small>
+            </div>
+            <button class="btn btn-outline-danger adv-del-btn" onclick="advDelete('reference', ${r.id})"><i class="fa-solid fa-trash"></i></button>
           </div>
-          <button class="btn btn-outline-danger adv-del-btn" onclick="advDelete('reference', ${r.id})"><i class="fa-solid fa-trash"></i></button>
         </div>
       </div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
 }
 
 // Generic Submitter for Solutions, Innovations, Roadmaps, Goals, Team & CRM
 async function submitAdvModule(e, moduleName) {
   e.preventDefault();
   const formData = new FormData(e.target);
-  const payload = { module: moduleName };
+  const payload = { id: Date.now(), module: moduleName };
   formData.forEach((v, k) => payload[k] = v);
-  await fetch(`${API_BASE_URL}/api/adv/create`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+
+  if (moduleName === "solution") DB.solutions.unshift(payload);
+  if (moduleName === "innovation") { DB.innovations = DB.innovations || []; DB.innovations.unshift(payload); }
+  if (moduleName === "roadmap") { DB.roadmaps = DB.roadmaps || []; DB.roadmaps.unshift(payload); }
+  if (moduleName === "goal") { DB.goals_habits = DB.goals_habits || []; DB.goals_habits.unshift(payload); }
+  if (moduleName === "crm") { DB.org_crm = DB.org_crm || []; DB.org_crm.unshift(payload); }
+
+  if (window.saveLocalCache) saveLocalCache();
   e.target.reset();
-  syncDatabase();
+  if (window.renderAllPages) renderAllPages();
+
+  try {
+    await fetch(`${API_BASE_URL}/api/adv/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {}
 }
 
-//Editable Business Model Canvas
+// Editable Business Model Canvas
 function renderInteractiveBMC() {
   const bmcSec = document.getElementById("page-bmc-canvas");
-  if (!bmcSec || !ADV_STORE.bmc) return;
-  const b = ADV_STORE.bmc;
+  if (!bmcSec) return;
+  const b = ADV_STORE.bmc || DEFAULT_ADV_STORE.bmc;
   bmcSec.innerHTML = `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
@@ -722,13 +770,14 @@ async function saveEditableBMC() {
     revenue: document.getElementById("bmc_revenue").value
   };
   await saveAdvStore({ bmc });
+  alert("Business Model Canvas Saved!");
 }
 
 // Editable Active Startup Workspace
 function renderActiveStartupWorkspaceAdv() {
   const sec = document.getElementById("page-active-startup");
-  if (!sec || !ADV_STORE.active_workspace) return;
-  const w = ADV_STORE.active_workspace;
+  if (!sec) return;
+  const w = ADV_STORE.active_workspace || DEFAULT_ADV_STORE.active_workspace;
   sec.innerHTML = `
     <div class="glass-card border-primary mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
@@ -742,7 +791,7 @@ function renderActiveStartupWorkspaceAdv() {
         <div class="col-md-4"><label class="small text-secondary">Current Solution</label><textarea id="aw_sol" class="form-control" rows="2">${w.solution || ""}</textarea></div>
         <div class="col-md-4"><label class="small text-secondary">Key Milestones</label><textarea id="aw_mile" class="form-control" rows="2">${w.milestones || ""}</textarea></div>
         <div class="col-md-6">
-          <label class="small text-secondary">Overall Progress (${w.progress}%)</label>
+          <label class="small text-secondary">Overall Progress (${w.progress || 50}%)</label>
           <input type="range" id="aw_prog" class="form-range" min="0" max="100" value="${w.progress || 50}" onchange="saveActiveWorkspaceAdv()">
         </div>
         <div class="col-md-6">
@@ -765,19 +814,18 @@ async function saveActiveWorkspaceAdv() {
     hours: Number(document.getElementById("aw_hours").value)
   };
   await saveAdvStore({ active_workspace });
+  alert("Active Startup Workspace Updated!");
 }
 
-// =========================================================================
-// INTERACTIVE DRAG & DROP KNOWLEDGE GRAPH & MIND MAP
-// =========================================================================
+// Interactive Drag & Drop Knowledge Graph & Mind Map
 function drawInteractiveGraph() {
   const canvas = document.getElementById("knowledgeGraphCanvas");
-  if (!canvas || !ADV_STORE.graph_nodes) return;
+  if (!canvas) return;
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const nodes = ADV_STORE.graph_nodes;
-  const links = ADV_STORE.graph_links || [];
+  const nodes = ADV_STORE.graph_nodes?.length ? ADV_STORE.graph_nodes : DEFAULT_ADV_STORE.graph_nodes;
+  const links = ADV_STORE.graph_links?.length ? ADV_STORE.graph_links : DEFAULT_ADV_STORE.graph_links;
 
   ctx.strokeStyle = "rgba(148, 163, 184, 0.45)";
   ctx.lineWidth = 2.5;
@@ -804,10 +852,11 @@ function drawInteractiveGraph() {
     ctx.fillStyle = "#fff";
     ctx.font = "600 11px Inter";
     ctx.textAlign = "center";
-    const parts = n.label.split(":");
+    const parts = (n.label || "").split(":");
     parts.forEach((p, idx) => ctx.fillText(p.trim(), n.x, n.y - 3 + idx * 14));
   });
 }
+window.drawInteractiveGraph = drawInteractiveGraph;
 
 async function addCustomGraphNode() {
   const lbl = document.getElementById("kgNodeLabel").value.trim();
@@ -852,14 +901,13 @@ async function importGraphFile(e) {
   }
 }
 
-// Mind Map Renderer & Controls
 function drawInteractiveMindMap() {
   const canvas = document.getElementById("mindMapCanvas");
-  if (!canvas || !ADV_STORE.mindmap_nodes) return;
+  if (!canvas) return;
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const nodes = ADV_STORE.mindmap_nodes;
+  const nodes = ADV_STORE.mindmap_nodes?.length ? ADV_STORE.mindmap_nodes : DEFAULT_ADV_STORE.mindmap_nodes;
   const root = nodes[0];
 
   ctx.strokeStyle = "rgba(124, 58, 237, 0.5)";
@@ -884,6 +932,7 @@ function drawInteractiveMindMap() {
     ctx.fillText(n.label, n.x, n.y + 4);
   });
 }
+window.drawInteractiveMindMap = drawInteractiveMindMap;
 
 async function addCustomMindNode() {
   const lbl = document.getElementById("mmNodeLabel").value.trim();
@@ -910,7 +959,6 @@ async function uploadMindMapDiagram(e) {
   }
 }
 
-// Enable Mouse Drag-and-Drop on Knowledge Graph & Mind Map Canvases
 function enableCanvasDragging() {
   const kgCanvas = document.getElementById("knowledgeGraphCanvas");
   if (kgCanvas) {
@@ -964,134 +1012,3 @@ window.addEventListener("DOMContentLoaded", () => {
   loadAdvStore();
   enableCanvasDragging();
 });
-/* ==========================================================================
-   KANBAN BOARD & PROJECT MANAGEMENT — DELETE BUTTON + ADD TASK UPGRADE
-   ========================================================================== */
-
-// 1. Kanban Board aur Project Management me Delete Button lagana
-renderTasksAndKanban = function() {
-  // Project Management Table me Delete Button
-  const projTable = document.getElementById("projectTasksTableBody");
-  if (projTable) {
-    projTable.innerHTML = DB.tasks.map(t => `
-      <tr>
-        <td class="fw-semibold">${t.title}</td>
-        <td><span class="pill-badge pill-violet">${t.project_name}</span></td>
-        <td><span class="pill-badge pill-cyan">${t.kanban_stage}</span></td>
-        <td>${t.priority}</td>
-        <td>${t.deadline}</td>
-        <td>${t.dependencies || "None"}</td>
-        <td>
-          <div class="d-flex justify-content-between align-items-center">
-            <span>${t.assignee}</span>
-            <button class="btn btn-sm btn-outline-danger adv-del-btn py-0 px-2" onclick="advDelete('task', ${t.id})" title="Delete Task">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
-    `).join("");
-  }
-
-  // Kanban Board ke har Card par Delete Button + Stage Change Dropdown
-  const kanbanWrap = document.getElementById("kanbanBoardGrid");
-  if (kanbanWrap) {
-    kanbanWrap.innerHTML = KANBAN_STAGES.map(stage => {
-      const cards = DB.tasks.filter(t => t.kanban_stage === stage);
-      return `
-        <div class="kanban-column" ondragover="event.preventDefault()" ondrop="handleKanbanDrop(event, '${stage}')">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="fw-bold small text-uppercase">${stage}</span>
-            <span class="badge bg-secondary">${cards.length}</span>
-          </div>
-          ${cards.map(c => `
-            <div class="kanban-item" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${c.id}')">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="pill-badge pill-violet">${c.project_name}</span>
-                <div class="d-flex align-items-center gap-1">
-                  <small class="text-warning fw-bold me-1">${c.priority}</small>
-                  <button class="btn btn-sm btn-outline-danger adv-del-btn py-0 px-1" onclick="advDelete('task', ${c.id})" title="Delete Task">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="fw-semibold small mb-2">${c.title}</div>
-              <div class="d-flex justify-content-between align-items-center text-secondary" style="font-size:0.72rem;">
-                <span><i class="fa-regular fa-calendar me-1"></i>${c.deadline}</span>
-                <span>${c.assignee}</span>
-              </div>
-            </div>
-          `).join("")}
-        </div>
-      `;
-    }).join("");
-  }
-};
-
-// 2. Kanban Board ke upar Naya Task Add karne aur Clear All ka Toolbar lagana
-function injectKanbanToolbar() {
-  const kbPage = document.getElementById("page-kanban-board");
-  if (kbPage && !document.getElementById("kbAddTaskBar")) {
-    kbPage.insertAdjacentHTML("afterbegin", `
-      <div id="kbAddTaskBar" class="adv-toolbar">
-        <h6 class="fw-bold text-info mb-2"><i class="fa-solid fa-table-columns me-2"></i>+ Add New Task to Kanban Board</h6>
-        <form onsubmit="createNewKanbanTask(event)" class="row g-2">
-          <div class="col-md-3">
-            <input type="text" id="kbTitle" class="form-control form-control-sm" placeholder="Task Name..." required>
-          </div>
-          <div class="col-md-2">
-            <input type="text" id="kbProject" class="form-control form-control-sm" placeholder="Project / Startup" value="BIGKNOWLEDGE OS" required>
-          </div>
-          <div class="col-md-2">
-            <select id="kbStage" class="form-select form-select-sm">
-              <option value="Ideas">Ideas</option>
-              <option value="Researching">Researching</option>
-              <option value="Planning">Planning</option>
-              <option value="Building" selected>Building</option>
-              <option value="Testing">Testing</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
-          <div class="col-md-2">
-            <select id="kbPriority" class="form-select form-select-sm">
-              <option value="Critical">Critical</option>
-              <option value="High" selected>High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
-            </select>
-          </div>
-          <div class="col-md-2">
-            <input type="date" id="kbDeadline" class="form-control form-control-sm" value="2026-11-15" required>
-          </div>
-          <div class="col-md-1">
-            <button type="submit" class="btn-brand btn-sm w-100">Add</button>
-          </div>
-        </form>
-      </div>
-    `);
-  }
-}
-
-async function createNewKanbanTask(e) {
-  e.preventDefault();
-  await fetch(`${API_BASE_URL}/api/tasks`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title: document.getElementById("kbTitle").value,
-      project_name: document.getElementById("kbProject").value,
-      kanban_stage: document.getElementById("kbStage").value,
-      priority: document.getElementById("kbPriority").value,
-      deadline: document.getElementById("kbDeadline").value,
-      assignee: "Founder"
-    })
-  });
-  e.target.reset();
-  syncDatabase();
-}
-
-// Page load hote hi Kanban Toolbar aur Delete buttons chalu karein
-setTimeout(() => {
-  injectKanbanToolbar();
-  renderTasksAndKanban();
-}, 200);
